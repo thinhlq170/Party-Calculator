@@ -23,12 +23,12 @@
         tools:ignore="RtlSymmetry" />
 
     <EditText
-        android:id="@+id/edit_change_amount"
+        android:id="@+id/edit_paid_amount"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="5dp"
         android:background="@drawable/round_grey"
         android:layout_weight="1"
-        android:hint="@string/change_amount"
+        android:hint="@string/paid_amount"
         android:inputType="number|numberDecimal"
         android:textSize="14sp"
         android:paddingStart="10dp"

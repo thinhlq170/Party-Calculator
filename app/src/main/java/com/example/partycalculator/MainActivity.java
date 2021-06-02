@@ -25,20 +25,19 @@ public class MainActivity extends Activity {
     ListView lstViewParty;
     FloatingActionButton addButton;
     Toolbar toolbar;
-
+    Party party;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        @SuppressLint("SimpleDateFormat")
-        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
-        String duration = dateFormat.format(date);
-
         toolbar = findViewById(R.id.toolbarMain);
         toolbar.setTitle(R.string.list_party);
+        if(getIntent().getExtras() != null) {
+            party = (Party) getIntent().getExtras().get("partyObj");
+            lstParty.add(party);
+        }
         showListParty(lstParty);
 
         addButton = findViewById(R.id.addparty);
@@ -50,9 +49,13 @@ public class MainActivity extends Activity {
             startActivity(intent);
         });
 
+
+
         lstViewParty.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-            intent.putExtra("PartyName", lstParty.get(position).name);
+            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            if(lstParty.get(position) != null) {
+                intent.putExtra("partyObj", lstParty.get(position));
+            }
             startActivity(intent);
         });
 

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 public class Member implements Serializable {
+    private long counter = 0;
     public long id;
     public String name;
     public String phone;
@@ -17,6 +18,10 @@ public class Member implements Serializable {
         this.paidAmount = paidAmount;
         this.changeAmount = changeAmount;
         this.joinDate = joinDate;
+    }
+
+    public Member() {
+        this.id = ++counter;
     }
 
     public long getId() {
@@ -67,7 +72,7 @@ public class Member implements Serializable {
         this.joinDate = joinDate;
     }
 
-    public Member() {}
+
 
 
 }
