@@ -1,5 +1,6 @@
 package com.example.partycalculator.adapters;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -30,9 +31,10 @@ public class PartyListViewAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return lstParty.get(position).partyId;
+        return lstParty.get(position).getId();
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -46,10 +48,13 @@ public class PartyListViewAdapter extends BaseAdapter {
 
         //bind du lieu vao view
         Party party = (Party) getItem(position);
-        ((TextView) viewParty.findViewById(R.id.idparty)).setText(String.format("ID: %d", party.partyId));
-        ((TextView) viewParty.findViewById(R.id.nameparty)).setText(String.format("Party: %s", party.name));
-        ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Date: %s", party.date));
-
+        ((TextView) viewParty.findViewById(R.id.idparty)).setText(String.format("ID: %d", party.getId()));
+        ((TextView) viewParty.findViewById(R.id.nameparty)).setText(String.format("Party: %s", party.getName()));
+        if(party.getUpdateDate() != null && !party.getUpdateDate().isEmpty()) {
+            ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Last modified: %s\nCreated: %s", party.getUpdateDate(), party.getDate()));
+        } else {
+            ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Created: %s", party.getDate()));
+        }
         return viewParty;
     }
 }

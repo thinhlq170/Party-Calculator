@@ -26,45 +26,54 @@
             android:inputType="text"/>
     </androidx.appcompat.widget.Toolbar>
 
-    <Button
-        android:id="@+id/button_add"
-        android:background="@drawable/round_primary"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:text="@string/add_mem_button"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="15dp"
-        android:textColor="@color/white"
-        android:textAllCaps="false"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:drawableEnd="@drawable/ic_add" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <Button
+            android:id="@+id/button_add"
+            android:background="@drawable/round_primary"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/add_mem_button"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="15dp"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:drawableEnd="@drawable/ic_add" />
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="5dp"
-        android:paddingBottom="5dp">
+        android:paddingBottom="5dp"
+        android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"
+            android:layout_marginEnd="1dp"
+            android:layout_weight="0.5"
             android:textSize="15sp"
-            android:paddingStart="10dp"
+            android:paddingStart="1dp"
             android:textColor="@android:color/holo_red_light"
             android:text="Name"
             android:textStyle="bold"
             android:gravity="center"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="130dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="15dp"
-            android:layout_weight="1"
+            android:layout_marginStart="32dp"
+            android:layout_marginLeft="1dp"
+            android:layout_weight="0.5"
             android:textSize="15sp"
             android:paddingStart="10dp"
             android:textColor="@android:color/holo_red_light"
@@ -73,15 +82,41 @@
             android:gravity="center"/>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="23dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="0.5"
+            android:textSize="15sp"
+            android:paddingStart="0dp"
+            android:textColor="@android:color/holo_red_light"
+            android:text="Phone"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:layout_marginEnd="60dp"
-            android:layout_weight="1"
+            android:layout_marginEnd="0dp"
+            android:layout_weight="0.5"
+            android:textSize="15sp"
+            android:paddingStart="1dp"
+            android:textColor="@android:color/holo_red_light"
+            android:text="Change Amount"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="30dp"
+            android:layout_weight="0.5"
             android:textSize="15sp"
             android:paddingStart="10dp"
             android:textColor="@android:color/holo_red_light"
-            android:text="Phone"
+            android:text="Join Date"
             android:textStyle="bold"
             android:gravity="center" />
     </LinearLayout>
@@ -91,6 +126,34 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_calculating"
+            android:background="@drawable/round_primary"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/calculating_button"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="15dp"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" />
+
+        <TextView
+            android:id="@+id/calculate_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Every Person Amount: "
+            android:layout_marginStart="100dp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/button_submit_list"

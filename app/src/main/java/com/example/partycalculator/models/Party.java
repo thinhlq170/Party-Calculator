@@ -1,32 +1,36 @@
 package com.example.partycalculator.models;
 
+import android.content.Intent;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class Party implements Serializable {
-    private long counter = 0;
-    public long partyId;
-    public String name;
-    public String date;
-    public ArrayList<Member> lstMember;
+public class Party implements Serializable, Comparable<Party> {
+    private static AtomicInteger counter = new AtomicInteger(0);
+    private Integer id;
+    private String name;
+    private String date;
+    private String updateDate;
+    private ArrayList<Member> lstMember;
 
-    public Party(long partyId, String name, String date, ArrayList<Member> lstMember) {
-        this.partyId = partyId;
+    public Party(Integer partyId, String name, String date, ArrayList<Member> lstMember) {
+        this.id = partyId;
         this.name = name;
         this.date = date;
         this.lstMember = lstMember;
     }
 
     public Party() {
-        this.partyId = ++counter;
+        this.id = counter.incrementAndGet();
     }
 
-    public long getPartyId() {
-        return partyId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setPartyId(long partyId) {
-        this.partyId = partyId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -51,5 +55,18 @@ public class Party implements Serializable {
 
     public void setLstMember(ArrayList<Member> lstMember) {
         this.lstMember = lstMember;
+    }
+
+    @Override
+    public int compareTo(Party o) {
+        return this.getId().compareTo(o.getId());
+    }
+
+    public String getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(String updateDate) {
+        this.updateDate = updateDate;
     }
 }

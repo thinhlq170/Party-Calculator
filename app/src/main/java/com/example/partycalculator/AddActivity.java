@@ -9,15 +9,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.partycalculator.models.Member;
 import com.example.partycalculator.models.Party;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 public class AddActivity extends Activity implements View.OnClickListener{
@@ -28,11 +32,9 @@ public class AddActivity extends Activity implements View.OnClickListener{
     Button buttonSubmitList;
     EditText partyNameTv;
     Party party;
+    ArrayList<Party> lstParty;
+    Boolean isViewDetail = Boolean.FALSE;
 
-    @SuppressLint("SimpleDateFormat")
-    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-    Date date = new Date();
-    String today = dateFormat.format(date);
 
 
     @Override
@@ -48,18 +50,39 @@ public class AddActivity extends Activity implements View.OnClickListener{
         buttonAdd.setOnClickListener(this);
         buttonSubmitList.setOnClickListener(this);
 
+        // View detail
         if(getIntent().getExtras() != null) {
             party = (Party)getIntent().getExtras().get("partyObj");
-            partyNameTv.setText(party.getName());
-            if(party.getLstMember().size() > 0) {
-                addViewPartyDetail(party.getLstMember());
+            lstParty = (ArrayList<Party>) getIntent().getSerializableExtra("lstParty");
+            if(party != null) { //view detail
+                partyNameTv.setText(party.getName());
+                if(party.getLstMember().size() > 0) {
+                    addViewPartyDetail(party.getLstMember());
+                }
+                isViewDetail = Boolean.TRUE;
+            } else { //add party
+                party = new Party();
+                isViewDetail = Boolean.FALSE;
+            }
+
+            if(lstParty == null) {
+                lstParty = new ArrayList<>();
             }
         }
     }
 
-    private void addView() {
+    private void addViewAddParty() {
         @SuppressLint("InflateParams")
         final View memberView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
+        EditText editChangeAmountText = memberView.findViewById(R.id.change_amount);
+        TextView editJoinDateText = memberView.findViewById(R.id.join_date);
+
+        // set default value for change amount and join date
+        editChangeAmountText.setText("0.0");
+        editChangeAmountText.setEnabled(false);
+        editJoinDateText.setText(getCurrentTime());
+        // end set default value for change amount and join date
+
         ImageView imageClose = memberView.findViewById(R.id.image_remove);
         imageClose.setOnClickListener(v -> removeView(memberView));
         layoutList.addView(memberView);
@@ -75,20 +98,31 @@ public class AddActivity extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_add:
-                addView();
+                addViewAddParty();
                 break;
             case R.id.button_submit_list:
                 if(checkIfValidAndRead()) {
                     Intent intent = new Intent(AddActivity.this, MainActivity.class);
-                    Bundle bundle = new Bundle();
+                    //remove old party and create new list party
+                    ArrayList<Party> lstPartyNew = new ArrayList<>();
+                    if(lstParty != null) {
+                        for(int i = 0; i < lstParty.size(); i++) {
+                            if(!lstParty.get(i).getId().equals(party.getId())) {
+                                lstPartyNew.add(lstParty.get(i));
+                            }
+                        }
+                    }
                     String partyName = partyNameTv.getText().toString();
-                    Party party = new Party();
                     party.setName(partyName);
-                    party.setDate(today);
                     party.setLstMember(lstMember);
-                    bundle.putSerializable("list", lstMember);
-                    intent.putExtra("partyObj", party);
-                    intent.putExtras(bundle);
+                    if(isViewDetail.equals(Boolean.TRUE)) {
+                        party.setUpdateDate(getCurrentTime());
+                    } else {
+                        party.setDate(getCurrentTime());
+                    }
+                    lstPartyNew.add(party);
+                    Collections.sort(lstPartyNew);
+                    intent.putExtra("lstParty", (Serializable) lstPartyNew);
                     startActivity(intent);
                 }
                 break;
@@ -105,36 +139,33 @@ public class AddActivity extends Activity implements View.OnClickListener{
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
             EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
             EditText editPhoneText = memView.findViewById(R.id.edit_phone);
+            TextView joinDateTv = memView.findViewById(R.id.join_date);
 
             Member member = new Member();
             String name = editNameText.getText().toString();
             String paidAmountTxt = editPaidAmountText.getText().toString();
-            String phone = editPhoneText.getText().toString();
+            String phoneText = editPhoneText.getText().toString();
+            String phone = isNullOrEmpty(phoneText) ? "" : phoneText;
+            String jDate = joinDateTv.getText().toString();
 
             if(!isNullOrEmpty(name)) {
                 member.setName(name);
             } else {
                 result = false;
-                break;
+                editNameText.setError(getString(R.string.name_is_required));
             }
 
             if(!isNullOrEmpty(paidAmountTxt)) {
                 BigDecimal paidAmount = new BigDecimal(paidAmountTxt);
                 member.setPaidAmount(paidAmount);
             } else {
+                editPaidAmountText.setError(getString(R.string.paid_amount_is_required));
                 result = false;
-                break;
             }
 
-            if(!isNullOrEmpty(phone)) {
-                member.setPhone(phone);
-            } else {
-                result = false;
-                break;
-            }
-
+            member.setPhone(phone);
             member.setChangeAmount(BigDecimal.ZERO);
-            member.setJoinDate(today);
+            member.setJoinDate(jDate);
 
             lstMember.add(member);
         }
@@ -146,7 +177,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
             Toast.makeText(this, "Enter party name!", Toast.LENGTH_SHORT).show();
         } else if(lstMember.size() == 0) {
             result = false;
-            Toast.makeText(this, "Please add member!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please add member or details correctly!", Toast.LENGTH_SHORT).show();
         }  else if (!result) {
             Toast.makeText(this, "Enter all details correctly!", Toast.LENGTH_SHORT).show();
         }
@@ -161,12 +192,16 @@ public class AddActivity extends Activity implements View.OnClickListener{
         return result;
     }
 
+    @SuppressLint("SetTextI18n")
     private void addViewPartyDetail(ArrayList<Member> lstMem) {
         for(int i = 0; i < lstMem.size(); i++) {
+            @SuppressLint("InflateParams")
             final View memView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
             EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
             EditText editPhoneText = memView.findViewById(R.id.edit_phone);
+            EditText editChangeAmountText = memView.findViewById((R.id.change_amount));
+            TextView editJoinDate = memView.findViewById(R.id.join_date);
 
             Member member = lstMem.get(i);
 
@@ -175,9 +210,20 @@ public class AddActivity extends Activity implements View.OnClickListener{
             editNameText.setText(member.getName());
             editPaidAmountText.setText(member.getPaidAmount().toString());
             editPhoneText.setText(phone);
+            editChangeAmountText.setText(member.getChangeAmount().toString());
+            editJoinDate.setText(member.getJoinDate());
+
             ImageView imageClose = memView.findViewById(R.id.image_remove);
             imageClose.setOnClickListener(v -> removeView(memView));
             layoutList.addView(memView);
         }
+    }
+
+    private String getCurrentTime() {
+        @SuppressLint("SimpleDateFormat")
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        String currentTime = dateFormat.format(date);
+        return currentTime;
     }
 }
