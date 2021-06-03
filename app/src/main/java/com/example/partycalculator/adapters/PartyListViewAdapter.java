@@ -48,7 +48,8 @@ public class PartyListViewAdapter extends BaseAdapter {
 
         //bind du lieu vao view
         Party party = (Party) getItem(position);
-        ((TextView) viewParty.findViewById(R.id.idparty)).setText(String.format("ID: %d", party.getId()));
+        ((TextView) viewParty.findViewById(R.id.partyId)).setText(String.format("ID: %d", party.getId()));
+        ((TextView) viewParty.findViewById(R.id.numberMem)).setText(String.format("Number of members: %d", party.getLstMember().size()));
         ((TextView) viewParty.findViewById(R.id.nameparty)).setText(String.format("Party: %s", party.getName()));
         if(party.getUpdateDate() != null && !party.getUpdateDate().isEmpty()) {
             ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Last modified: %s\nCreated: %s", party.getUpdateDate(), party.getDate()));

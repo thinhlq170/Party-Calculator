@@ -26,26 +26,19 @@
             android:inputType="text"/>
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-
-        <Button
-            android:id="@+id/button_add"
-            android:background="@drawable/round_primary"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="@string/add_mem_button"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="15dp"
-            android:textColor="@color/white"
-            android:textAllCaps="false"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:drawableEnd="@drawable/ic_add" />
-
-    </LinearLayout>
+    <Button
+        android:id="@+id/button_add"
+        android:background="@drawable/round_primary"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:text="@string/add_mem_button"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="15dp"
+        android:textColor="@color/white"
+        android:textAllCaps="false"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:drawableEnd="@drawable/ic_add" />
 
 
     <LinearLayout
@@ -80,19 +73,6 @@
             android:text="Paid Amount"
             android:textStyle="bold"
             android:gravity="center"/>
-
-        <TextView
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="23dp"
-            android:layout_marginEnd="6dp"
-            android:layout_weight="0.5"
-            android:textSize="15sp"
-            android:paddingStart="0dp"
-            android:textColor="@android:color/holo_red_light"
-            android:text="Phone"
-            android:textStyle="bold"
-            android:gravity="center" />
 
         <TextView
             android:layout_width="150dp"
@@ -145,13 +125,32 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp" />
 
-        <TextView
-            android:id="@+id/calculate_text"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Every Person Amount: "
-            android:layout_marginStart="100dp"
-            android:textStyle="bold"/>
+            android:orientation="vertical"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="15dp">
+
+            <TextView
+                android:id="@+id/total_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/average_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+        </LinearLayout>
+
+
 
     </LinearLayout>
 

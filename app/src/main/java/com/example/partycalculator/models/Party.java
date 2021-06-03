@@ -1,8 +1,7 @@
 package com.example.partycalculator.models;
 
-import android.content.Intent;
-
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,6 +9,8 @@ public class Party implements Serializable, Comparable<Party> {
     private static AtomicInteger counter = new AtomicInteger(0);
     private Integer id;
     private String name;
+    private BigDecimal totalAmount;
+    private BigDecimal averageAmount;
     private String date;
     private String updateDate;
     private ArrayList<Member> lstMember;
@@ -66,7 +67,24 @@ public class Party implements Serializable, Comparable<Party> {
         return updateDate;
     }
 
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public BigDecimal getAverageAmount() {
+        return averageAmount;
+    }
+
+    public void setAverageAmount(BigDecimal averageAmount) {
+        this.averageAmount = averageAmount;
+    }
+
     public void setUpdateDate(String updateDate) {
         this.updateDate = updateDate;
     }
+
 }

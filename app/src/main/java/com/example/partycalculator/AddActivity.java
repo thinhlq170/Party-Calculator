@@ -17,12 +17,16 @@ import com.example.partycalculator.models.Party;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
 
 public class AddActivity extends Activity implements View.OnClickListener{
 
@@ -30,11 +34,11 @@ public class AddActivity extends Activity implements View.OnClickListener{
     LinearLayout layoutList;
     Button buttonAdd;
     Button buttonSubmitList;
+    Button buttonCalculate;
     EditText partyNameTv;
     Party party;
     ArrayList<Party> lstParty;
     Boolean isViewDetail = Boolean.FALSE;
-
 
 
     @Override
@@ -45,19 +49,22 @@ public class AddActivity extends Activity implements View.OnClickListener{
         layoutList = findViewById(R.id.layout_list);
         buttonAdd = findViewById(R.id.button_add);
         buttonSubmitList = findViewById(R.id.button_submit_list);
+        buttonCalculate = findViewById(R.id.button_calculating);
         partyNameTv = findViewById(R.id.party_name);
 
         buttonAdd.setOnClickListener(this);
         buttonSubmitList.setOnClickListener(this);
+        buttonCalculate.setOnClickListener(this);
 
         // View detail
         if(getIntent().getExtras() != null) {
             party = (Party)getIntent().getExtras().get("partyObj");
             lstParty = (ArrayList<Party>) getIntent().getSerializableExtra("lstParty");
-            if(party != null) { //view detail
+            if(party != null) { //view detail1
                 partyNameTv.setText(party.getName());
                 if(party.getLstMember().size() > 0) {
                     addViewPartyDetail(party.getLstMember());
+                    calculateAmount();
                 }
                 isViewDetail = Boolean.TRUE;
             } else { //add party
@@ -78,7 +85,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
         TextView editJoinDateText = memberView.findViewById(R.id.join_date);
 
         // set default value for change amount and join date
-        editChangeAmountText.setText("0.0");
+        editChangeAmountText.setText("0");
         editChangeAmountText.setEnabled(false);
         editJoinDateText.setText(getCurrentTime());
         // end set default value for change amount and join date
@@ -126,6 +133,9 @@ public class AddActivity extends Activity implements View.OnClickListener{
                     startActivity(intent);
                 }
                 break;
+            case R.id.button_calculating:
+                calculateAmount();
+                break;
         }
     }
 
@@ -138,14 +148,11 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
             EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
-            EditText editPhoneText = memView.findViewById(R.id.edit_phone);
             TextView joinDateTv = memView.findViewById(R.id.join_date);
 
             Member member = new Member();
             String name = editNameText.getText().toString();
             String paidAmountTxt = editPaidAmountText.getText().toString();
-            String phoneText = editPhoneText.getText().toString();
-            String phone = isNullOrEmpty(phoneText) ? "" : phoneText;
             String jDate = joinDateTv.getText().toString();
 
             if(!isNullOrEmpty(name)) {
@@ -163,7 +170,6 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 result = false;
             }
 
-            member.setPhone(phone);
             member.setChangeAmount(BigDecimal.ZERO);
             member.setJoinDate(jDate);
 
@@ -199,7 +205,6 @@ public class AddActivity extends Activity implements View.OnClickListener{
             final View memView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
             EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
-            EditText editPhoneText = memView.findViewById(R.id.edit_phone);
             EditText editChangeAmountText = memView.findViewById((R.id.change_amount));
             TextView editJoinDate = memView.findViewById(R.id.join_date);
 
@@ -209,7 +214,6 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
             editNameText.setText(member.getName());
             editPaidAmountText.setText(member.getPaidAmount().toString());
-            editPhoneText.setText(phone);
             editChangeAmountText.setText(member.getChangeAmount().toString());
             editJoinDate.setText(member.getJoinDate());
 
@@ -225,5 +229,54 @@ public class AddActivity extends Activity implements View.OnClickListener{
         Date date = new Date();
         String currentTime = dateFormat.format(date);
         return currentTime;
+    }
+
+    private void calculateAmount() {
+        if(layoutList.getChildCount() <= 0) {
+            Toast.makeText(this, "Please add member or details correctly!", Toast.LENGTH_SHORT).show();
+        } else {
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            int memberNumber = layoutList.getChildCount();
+
+            //Calculating total amount
+            for(int i = 0; i < memberNumber; i++) {
+                View memView = layoutList.getChildAt(i);
+                EditText paidAmountText = memView.findViewById(R.id.edit_paid_amount);
+                String paidAmountStr = paidAmountText.getText().toString();
+
+                BigDecimal paidAmount = BigDecimal.ZERO;
+                if(!isNullOrEmpty(paidAmountStr))
+                    paidAmount = new BigDecimal(paidAmountStr);
+                totalAmount = totalAmount.add(paidAmount);
+
+            }
+            BigDecimal averageAmount = totalAmount.divide(BigDecimal.valueOf(memberNumber), 2, RoundingMode.CEILING);
+            party.setTotalAmount(totalAmount);
+            party.setAverageAmount(averageAmount);
+
+            //Calculating change amount for every member
+            for(int i = 0; i < memberNumber; i++) {
+                View memView = layoutList.getChildAt(i);
+                TextView changeAmountText = memView.findViewById(R.id.change_amount);
+                EditText paidAmountText = memView.findViewById(R.id.edit_paid_amount);
+                String paidAmountStr = paidAmountText.getText().toString();
+
+
+                BigDecimal paidAmount = new BigDecimal("0");
+                if(!isNullOrEmpty(paidAmountStr))
+                    paidAmount = new BigDecimal(paidAmountStr);
+
+                BigDecimal changeAmount = paidAmount.subtract(averageAmount);
+                changeAmountText.setText(getCurrencyFormat(changeAmount));
+            }
+
+            ((TextView)findViewById(R.id.total_amount)).setText(String.format("Total Amount: %s", getCurrencyFormat(totalAmount)));
+            ((TextView)findViewById(R.id.average_amount)).setText(String.format("Average Amount: %s", getCurrencyFormat(averageAmount)));
+        }
+    }
+
+    private String getCurrencyFormat(BigDecimal n) {
+        DecimalFormat df = new DecimalFormat("###,###,###,###,###.00");
+        return df.format(n);
     }
 }
