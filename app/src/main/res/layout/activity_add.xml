@@ -49,7 +49,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="100dp"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="1dp"
@@ -62,50 +62,44 @@
             android:gravity="center"/>
 
         <TextView
-            android:layout_width="130dp"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="1dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="3dp"
             android:layout_weight="0.5"
             android:textSize="15sp"
-            android:paddingStart="10dp"
             android:textColor="@android:color/holo_red_light"
-            android:text="Paid Amount"
+            android:text="@string/paid_amount"
             android:textStyle="bold"
-            android:gravity="center"/>
+            android:gravity="center"
+            tools:ignore="RtlSymmetry" />
 
         <TextView
-            android:layout_width="150dp"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="0dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="35dp"
             android:layout_weight="0.5"
             android:textSize="15sp"
             android:paddingStart="1dp"
             android:textColor="@android:color/holo_red_light"
-            android:text="Change Amount"
+            android:text="@string/change_amount"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:gravity="center"
+            tools:ignore="RtlSymmetry" />
 
-        <TextView
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="30dp"
-            android:layout_weight="0.5"
-            android:textSize="15sp"
-            android:paddingStart="10dp"
-            android:textColor="@android:color/holo_red_light"
-            android:text="Join Date"
-            android:textStyle="bold"
-            android:gravity="center" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_list"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" />
+        android:layout_height="400dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/layout_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"/>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -136,7 +130,7 @@
                 android:id="@+id/total_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
 
@@ -144,15 +138,13 @@
                 android:id="@+id/average_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="50dp"
+                android:layout_marginStart="15dp"
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
 
         </LinearLayout>
-
-
-
     </LinearLayout>
+
 
     <Button
         android:id="@+id/button_submit_list"

@@ -4,11 +4,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,13 +23,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Locale;
 
 public class AddActivity extends Activity implements View.OnClickListener{
 
@@ -39,6 +39,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
     Party party;
     ArrayList<Party> lstParty;
     Boolean isViewDetail = Boolean.FALSE;
+    private static final int CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE = 7;
 
 
     @Override
@@ -81,14 +82,6 @@ public class AddActivity extends Activity implements View.OnClickListener{
     private void addViewAddParty() {
         @SuppressLint("InflateParams")
         final View memberView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
-        EditText editChangeAmountText = memberView.findViewById(R.id.change_amount);
-        TextView editJoinDateText = memberView.findViewById(R.id.join_date);
-
-        // set default value for change amount and join date
-        editChangeAmountText.setText("0");
-        editChangeAmountText.setEnabled(false);
-        editJoinDateText.setText(getCurrentTime());
-        // end set default value for change amount and join date
 
         ImageView imageClose = memberView.findViewById(R.id.image_remove);
         imageClose.setOnClickListener(v -> removeView(memberView));
@@ -148,12 +141,10 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
             EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
-            TextView joinDateTv = memView.findViewById(R.id.join_date);
 
             Member member = new Member();
             String name = editNameText.getText().toString();
             String paidAmountTxt = editPaidAmountText.getText().toString();
-            String jDate = joinDateTv.getText().toString();
 
             if(!isNullOrEmpty(name)) {
                 member.setName(name);
@@ -171,7 +162,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
             }
 
             member.setChangeAmount(BigDecimal.ZERO);
-            member.setJoinDate(jDate);
+            member.setJoinDate(getCurrentTime());
 
             lstMember.add(member);
         }
@@ -205,17 +196,19 @@ public class AddActivity extends Activity implements View.OnClickListener{
             final View memView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
             EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
-            EditText editChangeAmountText = memView.findViewById((R.id.change_amount));
-            TextView editJoinDate = memView.findViewById(R.id.join_date);
+            TextView editChangeAmountText = memView.findViewById((R.id.change_amount));
 
             Member member = lstMem.get(i);
-
-            String phone = isNullOrEmpty(member.getPhone()) ? "" : member.getPhone();
-
+            String changeAmountStr = getCurrencyFormat(member.getChangeAmount());
+            editChangeAmountText.setOnClickListener(v -> {
+                if(changeAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
+                    onButtonShowPopupWindowClick(memView, changeAmountStr);
+                }
+            });
+            //setChangeAmountPopup(editChangeAmountText, getCurrencyFormat(member.getChangeAmount())); // show popup when length of change amount is oversize
             editNameText.setText(member.getName());
             editPaidAmountText.setText(member.getPaidAmount().toString());
-            editChangeAmountText.setText(member.getChangeAmount().toString());
-            editJoinDate.setText(member.getJoinDate());
+            editChangeAmountText.setText(changeAmountStr);
 
             ImageView imageClose = memView.findViewById(R.id.image_remove);
             imageClose.setOnClickListener(v -> removeView(memView));
@@ -227,8 +220,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
         @SuppressLint("SimpleDateFormat")
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
-        String currentTime = dateFormat.format(date);
-        return currentTime;
+        return dateFormat.format(date);
     }
 
     private void calculateAmount() {
@@ -262,12 +254,19 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 String paidAmountStr = paidAmountText.getText().toString();
 
 
-                BigDecimal paidAmount = new BigDecimal("0");
+                BigDecimal paidAmount = BigDecimal.ZERO;
                 if(!isNullOrEmpty(paidAmountStr))
                     paidAmount = new BigDecimal(paidAmountStr);
 
                 BigDecimal changeAmount = paidAmount.subtract(averageAmount);
-                changeAmountText.setText(getCurrencyFormat(changeAmount));
+
+                String changeAmountStr = getCurrencyFormat(changeAmount);
+                changeAmountText.setText(changeAmountStr);
+                changeAmountText.setOnClickListener(v -> {
+                    if(changeAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
+                        onButtonShowPopupWindowClick(memView, changeAmountStr);
+                    }
+                });
             }
 
             ((TextView)findViewById(R.id.total_amount)).setText(String.format("Total Amount: %s", getCurrencyFormat(totalAmount)));
@@ -278,5 +277,32 @@ public class AddActivity extends Activity implements View.OnClickListener{
     private String getCurrencyFormat(BigDecimal n) {
         DecimalFormat df = new DecimalFormat("###,###,###,###,###.00");
         return df.format(n);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void onButtonShowPopupWindowClick(View view, String content) {
+
+        // inflate the layout of the popup window
+        LayoutInflater inflater = (LayoutInflater)
+                getSystemService(LAYOUT_INFLATER_SERVICE);
+        View popupView = inflater.inflate(R.layout.popup_window, null);
+
+        // create the popup window
+        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        boolean focusable = true; // lets taps outside the popup also dismiss it
+        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+        // show the popup window
+        // which view you pass in doesn't matter, it is only used for the window tolken
+        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+        TextView textView = popupView.findViewById(R.id.popup_text);
+        textView.setText(content);
+
+        // dismiss the popup window when touched
+        popupView.setOnTouchListener((v, event) -> {
+            popupWindow.dismiss();
+            return true;
+        });
     }
 }
