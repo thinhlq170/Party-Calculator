@@ -91,6 +91,7 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scroll_list_mem"
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:orientation="vertical">

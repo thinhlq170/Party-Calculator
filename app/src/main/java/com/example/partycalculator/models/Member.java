@@ -2,10 +2,11 @@ package com.example.partycalculator.models;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Member implements Serializable {
-    private long counter = 0;
-    public long id;
+    private static final AtomicInteger counter = new AtomicInteger(0);
+    public Integer id;
     public String name;
     public String phone;
     public BigDecimal paidAmount;
@@ -21,14 +22,14 @@ public class Member implements Serializable {
     }
 
     public Member() {
-        this.id = ++counter;
+        this.id = counter.incrementAndGet();
     }
 
-    public long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
