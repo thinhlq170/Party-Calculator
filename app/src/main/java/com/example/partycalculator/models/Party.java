@@ -2,36 +2,34 @@ package com.example.partycalculator.models;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Party implements Serializable, Comparable<Party> {
-    private static AtomicInteger counter = new AtomicInteger(0);
+
+    public static final String TABLE = "Party";
+    public static final String KEY_ID = "id";
+    public static final String NAME = "name";
+    public static final String TOTAL_AMOUNT = "total_amount";
+    public static final String AVERAGE_AMOUNT = "average_amount";
+    public static final String CREATE_DATE = "create_date";
+    public static final String UPDATE_DATE = "update_date";
+
     private Integer id;
     private String name;
     private BigDecimal totalAmount;
     private BigDecimal averageAmount;
     private String date;
     private String updateDate;
-    private ArrayList<Member> lstMember;
 
-    public Party(Integer partyId, String name, String date, ArrayList<Member> lstMember) {
-        this.id = partyId;
+    public Party(String name) {
         this.name = name;
-        this.date = date;
-        this.lstMember = lstMember;
     }
 
     public Party() {
-        this.id = counter.incrementAndGet();
     }
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -48,14 +46,6 @@ public class Party implements Serializable, Comparable<Party> {
 
     public void setDate(String date) {
         this.date = date;
-    }
-
-    public ArrayList<Member> getLstMember() {
-        return lstMember;
-    }
-
-    public void setLstMember(ArrayList<Member> lstMember) {
-        this.lstMember = lstMember;
     }
 
     @Override

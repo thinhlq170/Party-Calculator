@@ -2,35 +2,39 @@ package com.example.partycalculator.models;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Member implements Serializable {
-    private static final AtomicInteger counter = new AtomicInteger(0);
-    public Integer id;
-    public String name;
-    public String phone;
-    public BigDecimal paidAmount;
-    public BigDecimal changeAmount;
-    public String joinDate;
 
-    public Member(String name, String phone, BigDecimal paidAmount, BigDecimal changeAmount, String joinDate) {
-        this.name = name;
-        this.phone = phone;
-        this.paidAmount = paidAmount;
-        this.changeAmount = changeAmount;
-        this.joinDate = joinDate;
-    }
+    public static final String TABLE = "Member";
+    public static final String KEY_ID = "id";
+    public static final String PARTY_ID = "party_id";
+    public static final String NAME = "name";
+    public static final String PAID_AMOUNT = "paid_amount";
+    public static final String CHANGE_AMOUNT = "change_amount";
+    public static final String CREATE_DATE = "create_date";
+    public static final String UPDATE_DATE = "update_date";
+
+
+    private Integer id;
+    private String name;
+    private BigDecimal paidAmount;
+    private BigDecimal changeAmount;
+    private String createDate;
+    private String updateDate;
+    private Integer partyId;
+
 
     public Member() {
-        this.id = counter.incrementAndGet();
+    }
+
+    public Member(String name) {
+        this.name = name;
     }
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -39,14 +43,6 @@ public class Member implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public BigDecimal getPaidAmount() {
@@ -65,15 +61,27 @@ public class Member implements Serializable {
         this.changeAmount = changeAmount;
     }
 
-    public String getJoinDate() {
-        return joinDate;
+    public Integer getPartyId() {
+        return partyId;
     }
 
-    public void setJoinDate(String joinDate) {
-        this.joinDate = joinDate;
+    public void setPartyId(Integer partyId) {
+        this.partyId = partyId;
     }
 
+    public String getCreateDate() {
+        return createDate;
+    }
 
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
+    }
 
+    public String getUpdateDate() {
+        return updateDate;
+    }
 
+    public void setUpdateDate(String updateDate) {
+        this.updateDate = updateDate;
+    }
 }

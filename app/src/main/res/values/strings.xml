@@ -3,17 +3,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="list_party">List Party</string>
     <string name="index">STT</string>
-    <string name="name">Name</string>
+    <string name="name">Tên</string>
     <string name="phone">Phone</string>
-    <string name="paid_amount">Paid Amount</string>
-    <string name="change_amount">Change Amount</string>
+    <string name="paid_amount">Phí trả</string>
+    <string name="change_amount">Phí dư</string>
     <string name="join_date">Join Date</string>
-    <string name="party_name_hint">Enter party name</string>
+    <string name="party_name_hint">Nhập tên tiệc</string>
     <string name="party_name_hint_fill">Party X</string>
-    <string name="add_mem_button">Add Member</string>
-    <string name="save_content">Save</string>
-    <string name="save">Save</string>
-    <string name="name_is_required">Please enter member name!</string>
+    <string name="add_button">Thêm</string>
+    <string name="save_content">Lưu</string>
+    <string name="save">Lưu</string>
+    <string name="name_is_required">Vui lòng nhập tên</string>
     <string name="paid_amount_is_required">Please enter paid amount!</string>
-    <string name="calculating_button">Calculate</string>
+    <string name="calculating_button">Tính tiền</string>
+    <string name="item_price">Chi phí</string>
+    <string name="item">Việc chi tiền</string>
+    <string name="item_is_required">Vui lòng nhập thứ đã mua</string>
+    <string name="item_paid_is_required">Vui lòng nhập tiền đã chi</string>
+    <string name="total_amount">Tổng tiền</string>
 </resources>

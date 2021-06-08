@@ -4,42 +4,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddActivity"
+    tools:context=".AddGroceryActivity"
     android:orientation="vertical">
 
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar2"
+    <Toolbar
+        android:id="@+id/toolbarMain"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:background="@android:color/holo_blue_bright"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        tools:ignore="MissingConstraints">
-        <EditText
-            android:id="@+id/party_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@android:color/holo_blue_bright"
-            android:hint="@string/party_name_hint"
-            android:autofillHints="@string/party_name_hint_fill"
-            android:inputType="text"/>
-    </androidx.appcompat.widget.Toolbar>
+        tools:ignore="MissingConstraints" />
+
 
     <Button
-        android:id="@+id/button_add"
+        android:id="@+id/button_add_item"
         android:background="@drawable/round_primary"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="40dp"
         android:text="@string/add_button"
         android:layout_marginTop="10dp"
-        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
         android:textColor="@color/white"
         android:textAllCaps="false"
         android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:drawableEnd="@drawable/ic_add" />
-
+        android:paddingRight="10dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -57,7 +47,7 @@
             android:textSize="15sp"
             android:paddingStart="1dp"
             android:textColor="@android:color/holo_red_light"
-            android:text="Name"
+            android:text="@string/item"
             android:textStyle="bold"
             android:gravity="center"/>
 
@@ -69,34 +59,22 @@
             android:layout_weight="0.5"
             android:textSize="15sp"
             android:textColor="@android:color/holo_red_light"
-            android:text="@string/paid_amount"
-            android:textStyle="bold"
-            android:gravity="center"
-            tools:ignore="RtlSymmetry" />
-
-        <TextView
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="35dp"
-            android:layout_weight="0.5"
-            android:textSize="15sp"
-            android:paddingStart="1dp"
-            android:textColor="@android:color/holo_red_light"
-            android:text="@string/change_amount"
+            android:text="@string/item_price"
             android:textStyle="bold"
             android:gravity="center"
             tools:ignore="RtlSymmetry" />
 
     </LinearLayout>
 
+
     <ScrollView
-        android:id="@+id/scroll_list_mem"
+        android:id="@+id/scroll_list_grocery"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginTop="10dp">
         <LinearLayout
-            android:id="@+id/layout_list"
+            android:id="@+id/layout_list_grocery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"/>
@@ -108,45 +86,27 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/button_calculating"
+            android:id="@+id/button_total_amount_item"
             android:background="@drawable/round_primary"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="40dp"
-            android:text="@string/calculating_button"
+            android:text="@string/total_amount"
             android:layout_marginTop="10dp"
-            android:layout_marginStart="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:textColor="@color/white"
             android:textAllCaps="false"
             android:paddingLeft="10dp"
             android:paddingRight="10dp" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/total_amount_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="15dp">
-
-            <TextView
-                android:id="@+id/total_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
-
-            <TextView
-                android:id="@+id/average_amount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
-
-        </LinearLayout>
+            android:layout_marginStart="15dp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
     </LinearLayout>
-
-
     <Button
         android:id="@+id/button_submit_list"
         android:background="@drawable/round_primary"

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,9 +19,16 @@ import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
+import com.example.partycalculator.dtos.MemberDTO;
+import com.example.partycalculator.dtos.PartyDTO;
 import com.example.partycalculator.models.Member;
 import com.example.partycalculator.models.Party;
+import com.example.partycalculator.repositories.MemberRepo;
+import com.example.partycalculator.repositories.PartyRepo;
+
+import org.w3c.dom.Text;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -34,18 +42,19 @@ import java.util.Date;
 
 public class AddActivity extends Activity implements View.OnClickListener{
 
-    ArrayList<Member> lstMember = new ArrayList<>();
+    ArrayList<MemberDTO> lstMember = new ArrayList<>();
     LinearLayout layoutList;
     Button buttonAdd;
     Button buttonSubmitList;
     Button buttonCalculate;
     EditText partyNameTv;
-    Party party;
-    ArrayList<Party> lstParty;
+    ArrayList<PartyDTO> lstParty;
     Boolean isViewDetail = Boolean.FALSE;
     ScrollView scrollLstMemView;
     private static final int CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE = 7;
-
+    Integer partyId;
+    PartyDTO party;
+    PartyRepo partyRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +71,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
         buttonAdd.setOnClickListener(this);
         buttonSubmitList.setOnClickListener(this);
         buttonCalculate.setOnClickListener(this);
+        partyRepo = new PartyRepo();
 
         int orientation = getResources().getConfiguration().orientation;
         if(orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -72,39 +82,70 @@ public class AddActivity extends Activity implements View.OnClickListener{
             scrollLstMemView.setLayoutParams(params);
         }
 
+
         // View detail
         if(getIntent().getExtras() != null) {
-            party = (Party)getIntent().getExtras().get("partyObj");
-            lstParty = (ArrayList<Party>) getIntent().getSerializableExtra("lstParty");
-            if(party != null) { //view detail
-                partyNameTv.setText(party.getName());
-                if(party.getLstMember().size() > 0)
-                    lstMember = party.getLstMember();
-                isViewDetail = Boolean.TRUE;
-            } else { //add party
-                party = new Party();
-                isViewDetail = Boolean.FALSE;
-            }
-            if(lstParty == null)
-                lstParty = new ArrayList<>();
+            partyId = getIntent().getExtras().getInt("partyId");
+            party = partyRepo.getPartyById(partyId);
+            partyNameTv.setText(party.getName());
+            if(party.getListMembers().size() > 0)
+                lstMember = party.getListMembers();
+            isViewDetail = Boolean.TRUE;
+        } else {
+            party = new PartyDTO();
+            isViewDetail = Boolean.FALSE;
+            lstMember = new ArrayList<>();
         }
         if(lstMember != null && lstMember.size() > 0) {
             addViewPartyDetail(lstMember);
-            calculateAmount();
+            calculateAmount(Boolean.FALSE);
         }
 
     }
 
-    @SuppressLint("SetTextI18n")
-    private void addViewAddParty() {
-        @SuppressLint("InflateParams")
+    @SuppressLint({"SetTextI18n", "ResourceType", "InflateParams"})
+    private void addMemberView(MemberDTO dto) {
         final View memberView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
 
+        ImageView imagePurchase = memberView.findViewById(R.id.image_purchase_detail);
         TextView changeAmountText = memberView.findViewById(R.id.change_amount);
-        changeAmountText.setText(".00");
+        EditText editNameText = memberView.findViewById(R.id.edit_member_name);
+        TextView paidAmountText = memberView.findViewById(R.id.edit_paid_amount);
+
+        if(dto != null) {
+            editNameText.setText(dto.getName());
+            paidAmountText.setText(dto.getPaidAmount().toString());
+            changeAmountText.setText(dto.getChangeAmount().toString());
+        }
 
         ImageView imageClose = memberView.findViewById(R.id.image_remove);
         imageClose.setOnClickListener(v -> removeView(memberView));
+        imagePurchase.setOnClickListener(v -> {
+            String name = editNameText.getText().toString();
+            if(isNullOrEmpty(name)) {
+                editNameText.setError(getString(R.string.name_is_required));
+            }
+            MemberRepo memberRepo = new MemberRepo();
+            MemberDTO mem = new MemberDTO();
+            int memberId = -1;
+            if(dto != null) {
+                if(dto.getId() > 0) {
+                    memberId = dto.getId();
+                    mem = memberRepo.getMemberById(dto.getId());
+                }
+            } else {
+                mem.setName(name);
+                mem.setPartyId(partyId);
+                memberId = memberRepo.insert(mem);
+                memberView.setId(memberId);
+            }
+            String title = partyNameTv.getText().toString();
+            party.setName(title);
+            partyRepo.update(party);
+            Intent intent = new Intent(AddActivity.this, AddGroceryActivity.class);
+            intent.putExtra("memberId", memberId);
+            startActivity(intent);
+        });
         layoutList.addView(memberView);
     }
 
@@ -118,36 +159,25 @@ public class AddActivity extends Activity implements View.OnClickListener{
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_add:
-                addViewAddParty();
+                addMemberView(null);
                 break;
             case R.id.button_submit_list:
                 if(checkIfValidAndRead()) {
                     Intent intent = new Intent(AddActivity.this, MainActivity.class);
-                    //remove old party and create new list party
-                    ArrayList<Party> lstPartyNew = new ArrayList<>();
-                    if(lstParty != null) {
-                        for(int i = 0; i < lstParty.size(); i++) {
-                            if(!lstParty.get(i).getId().equals(party.getId())) {
-                                lstPartyNew.add(lstParty.get(i));
-                            }
-                        }
-                    }
                     String partyName = partyNameTv.getText().toString();
                     party.setName(partyName);
-                    party.setLstMember(lstMember);
+                    calculateAmount(Boolean.TRUE);
                     if(isViewDetail.equals(Boolean.TRUE)) {
                         party.setUpdateDate(getCurrentTime());
                     } else {
                         party.setDate(getCurrentTime());
                     }
-                    lstPartyNew.add(party);
-                    Collections.sort(lstPartyNew);
-                    intent.putExtra("lstParty", (Serializable) lstPartyNew);
+                    partyRepo.insert(party);
                     startActivity(intent);
                 }
                 break;
             case R.id.button_calculating:
-                calculateAmount();
+                calculateAmount(Boolean.FALSE);
                 break;
         }
     }
@@ -160,9 +190,9 @@ public class AddActivity extends Activity implements View.OnClickListener{
             View memView = layoutList.getChildAt(i);
 
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
-            EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
+            TextView editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
 
-            Member member = new Member();
+            MemberDTO member = new MemberDTO();
             String name = editNameText.getText().toString();
             String paidAmountTxt = editPaidAmountText.getText().toString();
 
@@ -176,13 +206,9 @@ public class AddActivity extends Activity implements View.OnClickListener{
             if(!isNullOrEmpty(paidAmountTxt)) {
                 BigDecimal paidAmount = new BigDecimal(paidAmountTxt);
                 member.setPaidAmount(paidAmount);
-            } else {
-                editPaidAmountText.setError(getString(R.string.paid_amount_is_required));
-                result = false;
             }
-
             member.setChangeAmount(BigDecimal.ZERO);
-            member.setJoinDate(getCurrentTime());
+            member.setPartyId(partyId);
 
             lstMember.add(member);
         }
@@ -202,37 +228,59 @@ public class AddActivity extends Activity implements View.OnClickListener{
     }
 
     private Boolean isNullOrEmpty(String text) {
-        boolean result = true;
-        if(text != null && !text.isEmpty()) {
-            result = false;
-        }
-        return result;
+        return text == null || text.isEmpty();
     }
 
-    @SuppressLint("SetTextI18n")
-    private void addViewPartyDetail(ArrayList<Member> lstMem) {
+    @SuppressLint({"SetTextI18n", "ResourceType"})
+    private void addViewPartyDetail(ArrayList<MemberDTO> lstMem) {
         layoutList.removeAllViewsInLayout();
         for(int i = 0; i < lstMem.size(); i++) {
-            final View memView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
-            EditText editNameText = memView.findViewById(R.id.edit_member_name);
-            EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
-            TextView editChangeAmountText = memView.findViewById((R.id.change_amount));
-
-            Member member = lstMem.get(i);
-            String changeAmountStr = getCurrencyFormat(member.getChangeAmount());
-            editChangeAmountText.setOnClickListener(v -> {
-                if(changeAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
-                    onButtonShowPopupWindowClick(memView, changeAmountStr);
-                }
-            });
-            //setChangeAmountPopup(editChangeAmountText, getCurrencyFormat(member.getChangeAmount())); // show popup when length of change amount is oversize
-            editNameText.setText(member.getName());
-            editPaidAmountText.setText(member.getPaidAmount().toString());
-            editChangeAmountText.setText(changeAmountStr);
-
-            ImageView imageClose = memView.findViewById(R.id.image_remove);
-            imageClose.setOnClickListener(v -> removeView(memView));
-            layoutList.addView(memView);
+            addMemberView(lstMem.get(i));
+//            final View memView = getLayoutInflater().inflate(R.layout.row_add_member, null, false);
+//            EditText editNameText = memView.findViewById(R.id.edit_member_name);
+//            TextView editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
+//            TextView editChangeAmountText = memView.findViewById((R.id.change_amount));
+//            ImageView imagePurchase = memView.findViewById(R.id.image_purchase_detail);
+//
+//            MemberDTO member = lstMem.get(i);
+//            String changeAmountStr = getCurrencyFormat(member.getChangeAmount());
+//            String paidAmountStr = getCurrencyFormat(member.getPaidAmount());
+//            editPaidAmountText.setOnClickListener(v -> {
+//                if(paidAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
+//                    onButtonShowPopupWindowClick(memView, paidAmountStr);
+//                }
+//            });
+//            editChangeAmountText.setOnClickListener(v -> {
+//                if(changeAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
+//                    onButtonShowPopupWindowClick(memView, changeAmountStr);
+//                }
+//            });
+//            imagePurchase.setOnClickListener(v -> {
+//                String name = editNameText.getText().toString();
+//                if(isNullOrEmpty(name)) {
+//                    editNameText.setError(getString(R.string.name_is_required));
+//                }
+//                MemberRepo memberRepo = new MemberRepo();
+//                MemberDTO mem = new MemberDTO();
+//                if(imagePurchase.getId() > 0) {
+//                    mem = memberRepo.getMemberById(imagePurchase.getId());
+//                } else {
+//                    mem.setName(name);
+//                    mem.setPartyId(partyId);
+//                    int imagePurchaseId = memberRepo.insert(mem);
+//                    imagePurchase.setId(imagePurchaseId);
+//                }
+//                Intent intent = new Intent(AddActivity.this, AddGroceryActivity.class);
+//                intent.putExtra("memberObj", (Serializable) mem);
+//                startActivity(intent);
+//            });
+//            editNameText.setText(member.getName());
+//            editPaidAmountText.setText(member.getPaidAmount().toString());
+//            editChangeAmountText.setText(changeAmountStr);
+//
+//            ImageView imageClose = memView.findViewById(R.id.image_remove);
+//            imageClose.setOnClickListener(v -> removeView(memView));
+//            layoutList.addView(memView);
         }
     }
 
@@ -243,7 +291,8 @@ public class AddActivity extends Activity implements View.OnClickListener{
         return dateFormat.format(date);
     }
 
-    private void calculateAmount() {
+    @SuppressLint("ResourceType")
+    private void calculateAmount(Boolean isSubmit) {
         if(layoutList.getChildCount() <= 0) {
             Toast.makeText(this, "Please add member or details correctly!", Toast.LENGTH_SHORT).show();
         } else {
@@ -253,7 +302,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
             //Calculating total amount
             for(int i = 0; i < memberNumber; i++) {
                 View memView = layoutList.getChildAt(i);
-                EditText paidAmountText = memView.findViewById(R.id.edit_paid_amount);
+                TextView paidAmountText = memView.findViewById(R.id.edit_paid_amount);
                 String paidAmountStr = paidAmountText.getText().toString();
 
                 BigDecimal paidAmount = BigDecimal.ZERO;
@@ -270,7 +319,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
             for(int i = 0; i < memberNumber; i++) {
                 View memView = layoutList.getChildAt(i);
                 TextView changeAmountText = memView.findViewById(R.id.change_amount);
-                EditText paidAmountText = memView.findViewById(R.id.edit_paid_amount);
+                TextView paidAmountText = memView.findViewById(R.id.edit_paid_amount);
                 String paidAmountStr = paidAmountText.getText().toString();
 
 
@@ -280,17 +329,31 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
                 BigDecimal changeAmount = paidAmount.subtract(averageAmount);
 
-                String changeAmountStr = getCurrencyFormat(changeAmount);
+                String changeAmountStr = changeAmount.toString();
                 changeAmountText.setText(changeAmountStr);
                 changeAmountText.setOnClickListener(v -> {
                     if(changeAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
                         onButtonShowPopupWindowClick(memView, changeAmountStr);
                     }
                 });
+                paidAmountText.setOnClickListener(v -> {
+                    if(paidAmountStr.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
+                        onButtonShowPopupWindowClick(memView, paidAmountStr);
+                    }
+                });
+
+                if(memView.getId() > 0) {
+                    MemberRepo memberRepo = new MemberRepo();
+                    MemberDTO memberDTO = memberRepo.getMemberById(memView.getId());
+                    memberDTO.setChangeAmount(averageAmount);
+                    memberRepo.update(memberDTO);
+                }
             }
 
-            ((TextView)findViewById(R.id.total_amount)).setText(String.format("Total Amount: %s", getCurrencyFormat(totalAmount)));
-            ((TextView)findViewById(R.id.average_amount)).setText(String.format("Average Amount: %s", getCurrencyFormat(averageAmount)));
+            if(isSubmit.equals(Boolean.FALSE)) {
+                ((TextView)findViewById(R.id.total_amount)).setText(String.format("Total Amount: %s", getCurrencyFormat(totalAmount)));
+                ((TextView)findViewById(R.id.average_amount)).setText(String.format("Average Amount: %s", getCurrencyFormat(averageAmount)));
+            }
         }
     }
 
@@ -338,34 +401,34 @@ public class AddActivity extends Activity implements View.OnClickListener{
             isCalculated = Boolean.TRUE;
         }
         outState.putBoolean("isCalculated", isCalculated);
-        ArrayList<Member> lstMem = getLstMemberCurrentState();
+        ArrayList<MemberDTO> lstMem = getLstMemberCurrentState();
         outState.putSerializable("lstMem", lstMem);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        ArrayList<Member> lstMem = (ArrayList<Member>) savedInstanceState.getSerializable("lstMem");
+        ArrayList<MemberDTO> lstMem = (ArrayList<MemberDTO>) savedInstanceState.getSerializable("lstMem");
         Boolean isCalculated = savedInstanceState.getBoolean("isCalculated");
         if(lstMem != null && lstMem.size() > 0) {
             lstMember = lstMem;
             addViewPartyDetail(lstMember);
             if(isCalculated.equals(Boolean.TRUE))
-                calculateAmount();
+                calculateAmount(Boolean.FALSE);
         }
     }
 
-    private ArrayList<Member> getLstMemberCurrentState() {
+    private ArrayList<MemberDTO> getLstMemberCurrentState() {
 
-        ArrayList<Member> lstMem = new ArrayList<>();
+        ArrayList<MemberDTO> lstMem = new ArrayList<>();
 
         for(int i = 0; i < layoutList.getChildCount(); i++) {
             View memView = layoutList.getChildAt(i);
 
             EditText editNameText = memView.findViewById(R.id.edit_member_name);
-            EditText editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
+            TextView editPaidAmountText = memView.findViewById(R.id.edit_paid_amount);
 
-            Member member = new Member();
+            MemberDTO member = new MemberDTO();
             String name = editNameText.getText().toString();
             String paidAmountTxt = editPaidAmountText.getText().toString();
 
@@ -379,7 +442,6 @@ public class AddActivity extends Activity implements View.OnClickListener{
             }
 
             member.setChangeAmount(BigDecimal.ZERO);
-            member.setJoinDate(getCurrentTime());
             lstMem.add(member);
         }
         return lstMem;
