@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.partycalculator.databases.DatabaseManager;
-import com.example.partycalculator.dtos.MemberDTO;
-import com.example.partycalculator.dtos.PartyDTO;
+import com.example.partycalculator.models.Grocery;
 import com.example.partycalculator.models.Member;
 import com.example.partycalculator.models.Party;
 
@@ -34,30 +34,30 @@ public class PartyRepo {
                 + ");";
     }
 
-    public int insert(PartyDTO party) {
-        int partyId;
+    public long insert(Party party) {
+        long partyId;
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         ContentValues values = initPartyData(party);
-        partyId = (int)db.insert(Party.TABLE, null, values);
+        partyId = db.insert(Party.TABLE, null, values);
         DatabaseManager.getInstance().closeDatabase();
         return partyId;
     }
 
-    public void delete() {
+    public void deleteARow(Long id) {
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
-        db.delete(Party.TABLE, null, null);
-        db.close();
+        db.delete(Party.TABLE, Party.KEY_ID + "=?", new String[]{String.valueOf(id)});
+        DatabaseManager.getInstance().closeDatabase();
     }
 
-    public ArrayList<PartyDTO> getListAllParty() {
-        ArrayList<PartyDTO> lstData = new ArrayList<>();
+    public ArrayList<Party> getListAllParty() {
+        ArrayList<Party> lstData = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         String sqlQuery = "SELECT * FROM Party";
         Cursor cursor = db.rawQuery(sqlQuery, null);
         if(cursor.moveToFirst()) {
             do {
-                PartyDTO dto = new PartyDTO();
+                Party dto = new Party();
                 dto.initFromCursor(cursor);
                 lstData.add(dto);
             } while(cursor.moveToNext());
@@ -66,8 +66,8 @@ public class PartyRepo {
         return lstData;
     }
 
-    public PartyDTO getPartyById(Integer partyId) {
-        PartyDTO dto = new PartyDTO();
+    public Party getPartyById(Long partyId) {
+        Party dto = new Party();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         Cursor cursor = db.query(Party.TABLE, new String[] { Party.KEY_ID,
@@ -82,7 +82,7 @@ public class PartyRepo {
         return dto;
     }
 
-    private ContentValues initPartyData(PartyDTO party) {
+    private ContentValues initPartyData(Party party) {
         ContentValues values = new ContentValues();
         values.put(Party.NAME, party.getName());
         values.put(Party.TOTAL_AMOUNT, party.getTotalAmount() == null ? null : party.getTotalAmount().toString());
@@ -102,7 +102,7 @@ public class PartyRepo {
         return dateFormat.format(date);
     }
 
-    public int update(PartyDTO dto) {
+    public int update(Party dto) {
         int updateSuccess = -1;
         if(dto != null) {
             ContentValues values = initPartyData(dto);
@@ -111,5 +111,19 @@ public class PartyRepo {
             DatabaseManager.getInstance().closeDatabase();
         }
         return updateSuccess;
+    }
+
+    public void deleteGroceriesByPartyId(Long partyId) {
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        db.delete(Grocery.TABLE, Grocery.PARTY_ID + "=?", new String[]{String.valueOf(partyId)});
+        DatabaseManager.getInstance().closeDatabase();
+        Log.v("Groceries deleted with","party id: " + partyId);
+    }
+
+    public void deleteMembersByPartyId(Long partyId) {
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        db.delete(Member.TABLE, Member.PARTY_ID + "=?", new String[]{String.valueOf(partyId)});
+        DatabaseManager.getInstance().closeDatabase();
+        Log.v("Members deleted with","party id: " + partyId);
     }
 }

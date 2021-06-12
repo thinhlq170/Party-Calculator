@@ -1,9 +1,11 @@
 package com.example.partycalculator.models;
 
+import android.database.Cursor;
+
+import com.example.partycalculator.repositories.GroceryRepo;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Member implements Serializable {
 
@@ -17,13 +19,13 @@ public class Member implements Serializable {
     public static final String UPDATE_DATE = "update_date";
 
 
-    private Integer id;
+    private Long id;
     private String name;
     private BigDecimal paidAmount;
     private BigDecimal changeAmount;
     private String createDate;
     private String updateDate;
-    private Integer partyId;
+    private Long partyId;
 
 
     public Member() {
@@ -33,7 +35,7 @@ public class Member implements Serializable {
         this.name = name;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
@@ -61,11 +63,11 @@ public class Member implements Serializable {
         this.changeAmount = changeAmount;
     }
 
-    public Integer getPartyId() {
+    public Long getPartyId() {
         return partyId;
     }
 
-    public void setPartyId(Integer partyId) {
+    public void setPartyId(Long partyId) {
         this.partyId = partyId;
     }
 
@@ -83,5 +85,20 @@ public class Member implements Serializable {
 
     public void setUpdateDate(String updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public void initFromCursor(Cursor cursor) {
+        GroceryRepo groceryRepo = new GroceryRepo();
+        this.id = cursor.getLong(cursor.getColumnIndex(Member.KEY_ID));
+        this.name = cursor.getString(cursor.getColumnIndex(Member.NAME));
+        this.paidAmount = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndex(Member.PAID_AMOUNT)));
+        this.changeAmount = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndex(Member.CHANGE_AMOUNT)));
+        this.partyId = cursor.getLong(cursor.getColumnIndex(Member.PARTY_ID));
+        this.createDate = cursor.getString(cursor.getColumnIndex(Member.CREATE_DATE));
+        this.updateDate = cursor.getString(cursor.getColumnIndex(Member.UPDATE_DATE));
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

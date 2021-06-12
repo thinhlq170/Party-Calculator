@@ -36,6 +36,7 @@
         android:textColor="@color/black"
         android:layout_width="35dp"
         android:layout_height="40dp"
+        android:maxLength="18"
         />
 
     <ImageView

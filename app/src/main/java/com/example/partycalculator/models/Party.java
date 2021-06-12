@@ -1,8 +1,9 @@
 package com.example.partycalculator.models;
 
+import android.database.Cursor;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Party implements Serializable, Comparable<Party> {
 
@@ -14,7 +15,7 @@ public class Party implements Serializable, Comparable<Party> {
     public static final String CREATE_DATE = "create_date";
     public static final String UPDATE_DATE = "update_date";
 
-    private Integer id;
+    private Long id;
     private String name;
     private BigDecimal totalAmount;
     private BigDecimal averageAmount;
@@ -28,7 +29,7 @@ public class Party implements Serializable, Comparable<Party> {
     public Party() {
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
@@ -77,4 +78,16 @@ public class Party implements Serializable, Comparable<Party> {
         this.updateDate = updateDate;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void initFromCursor(Cursor cursor) {
+        this.id = cursor.getLong(cursor.getColumnIndex(Party.KEY_ID));
+        this.name = cursor.getString(cursor.getColumnIndex(Party.NAME));
+        this.averageAmount = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndex(Party.AVERAGE_AMOUNT)));
+        this.totalAmount = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndex(Party.TOTAL_AMOUNT)));
+        this.date = cursor.getString(cursor.getColumnIndex(Party.CREATE_DATE));
+        this.updateDate = cursor.getString(cursor.getColumnIndex(Party.UPDATE_DATE));
+    }
 }

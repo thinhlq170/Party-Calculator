@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Party Calculator</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="list_party">List Party</string>
+    <string name="list_party">Danh sách tiệc</string>
     <string name="index">STT</string>
     <string name="name">Tên</string>
     <string name="phone">Phone</string>
@@ -21,4 +21,10 @@
     <string name="item_is_required">Vui lòng nhập thứ đã mua</string>
     <string name="item_paid_is_required">Vui lòng nhập tiền đã chi</string>
     <string name="total_amount">Tổng tiền</string>
+    <string name="delete_party_item_title">Xóa tiệc</string>
+    <string name="delete_party_message">Bạn có muốn xóa tiệc này?</string>
+    <string name="accept_text_dialog">Đồng ý</string>
+    <string name="deny_text_dialog">Không</string>
+    <string name="delete_member_dialog_title">Xóa người tham dự</string>
+    <string name="delete_member_dialog_message">Bạn có muốn xóa người này?</string>
 </resources>

@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#62def8">
+    android:background="@drawable/round_grey"
+    >
 
     <TextView
         android:id="@+id/popup_text"
@@ -11,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_margin="30dp"
-        android:textSize="22sp" />
+        android:textSize="22sp"
+        android:textStyle="bold"/>
 
 </RelativeLayout>

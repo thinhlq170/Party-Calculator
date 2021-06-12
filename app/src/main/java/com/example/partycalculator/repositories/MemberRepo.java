@@ -4,14 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.partycalculator.databases.DatabaseManager;
-import com.example.partycalculator.dtos.GroceryDTO;
-import com.example.partycalculator.dtos.MemberDTO;
-import com.example.partycalculator.dtos.PartyDTO;
 import com.example.partycalculator.models.Grocery;
 import com.example.partycalculator.models.Member;
-import com.example.partycalculator.models.Party;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -36,8 +33,8 @@ public class MemberRepo {
                 + ");";
     }
 
-    public int insert(MemberDTO mem) {
-        int memberId = -1;
+    public long insert(Member mem) {
+        long memberId = -1;
         if(mem != null) {
             SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
             ContentValues values = new ContentValues();
@@ -47,7 +44,7 @@ public class MemberRepo {
             values.put(Member.CHANGE_AMOUNT, mem.getChangeAmount() == null ? null : mem.getChangeAmount().toString());
             values.put(Member.CREATE_DATE, mem.getCreateDate());
             values.put(Member.UPDATE_DATE, mem.getUpdateDate());
-            memberId = (int)db.insert(Member.TABLE, null, values);
+            memberId = db.insert(Member.TABLE, null, values);
             DatabaseManager.getInstance().closeDatabase();
         }
         return memberId;
@@ -59,7 +56,7 @@ public class MemberRepo {
         db.close();
     }
 
-    public int update(MemberDTO dto) {
+    public int update(Member dto) {
         int updateSuccess = -1;
         if(dto != null) {
             ContentValues values = initMemberData(dto);
@@ -70,7 +67,7 @@ public class MemberRepo {
         return updateSuccess;
     }
 
-    private ContentValues initMemberData(MemberDTO mem) {
+    private ContentValues initMemberData(Member mem) {
         ContentValues values = new ContentValues();
         values.put(Member.NAME, mem.getName());
         values.put(Member.PARTY_ID, mem.getPartyId());
@@ -84,17 +81,17 @@ public class MemberRepo {
         return values;
     }
 
-    public ArrayList<MemberDTO> getListMemberByPartyId(Integer partyId) {
-        ArrayList<MemberDTO> lstData = new ArrayList<>();
+    public ArrayList<Member> getListMemberByPartyId(Long partyId) {
+        ArrayList<Member> lstData = new ArrayList<>();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
-        String sqlQuery = "SELECT * FROM Member mem"
+        String sqlQuery = "SELECT mem.* FROM Member mem"
                 + " JOIN Party party ON mem.party_id = party.id "
                 + " WHERE party.id = " + partyId;
         Cursor cursor = db.rawQuery(sqlQuery, null);
         if(cursor.moveToFirst()) {
             do {
-                MemberDTO dto = new MemberDTO();
+                Member dto = new Member();
                 dto.initFromCursor(cursor);
                 lstData.add(dto);
             } while(cursor.moveToNext());
@@ -102,8 +99,8 @@ public class MemberRepo {
         return lstData;
     }
 
-    public MemberDTO getMemberById(Integer memberId) {
-        MemberDTO dto = new MemberDTO();
+    public Member getMemberById(Long memberId) {
+        Member dto = new Member();
 
         SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
         Cursor cursor = db.query(Member.TABLE, new String[] { Member.KEY_ID,
@@ -123,6 +120,18 @@ public class MemberRepo {
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
         return dateFormat.format(date);
+    }
+    public void deleteARow(Long id) {
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        db.delete(Member.TABLE, Member.KEY_ID + "=?", new String[]{String.valueOf(id)});
+        DatabaseManager.getInstance().closeDatabase();
+    }
+
+    public void deleteGroceriesByMemberId(Long memberId) {
+        SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
+        db.delete(Grocery.TABLE, Grocery.MEMBER_ID + "=?", new String[]{String.valueOf(memberId)});
+        DatabaseManager.getInstance().closeDatabase();
+        Log.v("Groceries deleted with","member id: " + memberId);
     }
 
 }

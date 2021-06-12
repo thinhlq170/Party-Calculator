@@ -4,20 +4,26 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
-import com.example.partycalculator.dtos.GroceryDTO;
-import com.example.partycalculator.dtos.MemberDTO;
+import androidx.annotation.RequiresApi;
+
+import com.example.partycalculator.models.Grocery;
+import com.example.partycalculator.models.Member;
 import com.example.partycalculator.repositories.GroceryRepo;
 import com.example.partycalculator.repositories.MemberRepo;
 
@@ -25,18 +31,20 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+@RequiresApi(api = Build.VERSION_CODES.N)
 public class AddGroceryActivity extends Activity implements View.OnClickListener {
 
     Button saveButton;
     Button addItemButton;
     Button totalButton;
     Toolbar titleTb;
-    MemberDTO member;
-    ArrayList<GroceryDTO> listItem;
+    Member member;
+    ArrayList<Grocery> listItem;
     ScrollView scrollListItemView;
     LinearLayout layoutListItem;
     TextView totalText;
-    int memberId;
+    Long memberId;
+    Long partyId;
 
     GroceryRepo groceryRepo = new GroceryRepo();
     MemberRepo memberRepo = new MemberRepo();
@@ -65,15 +73,16 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
         titleTb = findViewById(R.id.toolbarMain);
 
         if(getIntent().getExtras() != null) {
-            memberId = getIntent().getExtras().getInt("memberId");
+            memberId = getIntent().getExtras().getLong("memberId");
+            partyId = getIntent().getExtras().getLong("partyId");
             if(memberId > 0) {
                 member = memberRepo.getMemberById(memberId);
-                listItem = member.getListGroceries();
+                listItem = groceryRepo.getListGroceryByMemberId(memberId);
                 if(listItem != null && listItem.size() > 0) {
                     showListItem(listItem);
                 }
             } else {
-                member = new MemberDTO();
+                member = new Member();
             }
         }
 
@@ -99,7 +108,7 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
             case R.id.button_submit_list:
                 if(checkIfValidAndRead()) {
                     Intent intent = new Intent(AddGroceryActivity.this, AddActivity.class);
-                    intent.putExtra("partyId", member.getPartyId());
+                    intent.putExtra("partyId", partyId);
                     startActivity(intent);
                 }
             case R.id.button_total_amount_item:
@@ -112,7 +121,7 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
         }
     }
 
-    private void showListItem(ArrayList<GroceryDTO> lstItem) {
+    private void showListItem(ArrayList<Grocery> lstItem) {
         if (listItem != null && lstItem.size() > 0) {
             for(int i = 0; i < lstItem.size(); i++) {
                 addItemView(lstItem.get(i));
@@ -120,8 +129,9 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
         }
     }
 
+
     @SuppressLint({"SetTextI18n", "InflateParams"})
-    private void addItemView(GroceryDTO dto) {
+    private void addItemView(Grocery dto) {
         final View itemView = getLayoutInflater().inflate(R.layout.row_add_grocery, null, false);
         ImageView imageClose = itemView.findViewById(R.id.image_remove);
         EditText nameText = itemView.findViewById(R.id.edit_item_name);
@@ -133,7 +143,7 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
             if(dto.getPrice() != null) {
                 paidText.setText(dto.getPrice().toString());
             }
-            imageClose.setId(dto.getId());
+            itemView.setId(Math.toIntExact(dto.getId()));
         }
         imageClose.setOnClickListener(v -> {
             if(dto != null)
@@ -166,17 +176,18 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
                 paidText.setError(getResources().getString(R.string.item_paid_is_required));
             }
             if(itemView.getId() > 0) {
-                GroceryDTO dto = groceryRepo.getGroceryById(itemView.getId());
+                Grocery dto = groceryRepo.getGroceryById((long) itemView.getId());
                 dto.setItemName(nameStr);
                 dto.setPrice(new BigDecimal(paidStr));
                 groceryRepo.update(dto);
             } else {
-                GroceryDTO dto = new GroceryDTO();
+                Grocery dto = new Grocery();
                 dto.setItemName(nameStr);
                 dto.setPrice(new BigDecimal(paidStr));
                 dto.setMemberId(member.getId());
-                int groceryId = groceryRepo.insert(dto);
-                itemView.setId(groceryId);
+                dto.setPartyId(partyId);
+                long groceryId = groceryRepo.insert(dto);
+                itemView.setId(Math.toIntExact(groceryId));
             }
             total = total.add(new BigDecimal(paidStr));
         }
@@ -199,7 +210,38 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
     }
 
     private String getCurrencyFormat(BigDecimal n) {
-        DecimalFormat df = new DecimalFormat("###,###,###,###,###.00");
+        DecimalFormat df = new DecimalFormat("###,###,###,###,###,###,###.0");
         return df.format(n);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        TextView totalText = findViewById(R.id.total_amount_item);
+        String totalStr = totalText.getText().toString();
+        Boolean isCalculated = Boolean.FALSE;
+        if(!isNullOrEmpty(totalStr)) {
+            isCalculated = Boolean.TRUE;
+        }
+        outState.putBoolean("isCalculated", isCalculated);
+        outState.putSerializable("lstItem", listItem);
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        ArrayList<Grocery> lstItem = (ArrayList<Grocery>) savedInstanceState.getSerializable("lstItem");
+        Boolean isCalculated = savedInstanceState.getBoolean("isCalculated");
+        if(lstItem != null && lstItem.size() > 0) {
+            listItem = lstItem;
+            //addViewPartyDetail(lstMember);
+            BigDecimal totalAmount;
+            if(isCalculated.equals(Boolean.TRUE)) {
+                totalAmount = calculateTotalAmount();
+                TextView totalText = findViewById(R.id.total_amount_item);
+                totalText.setText(String.format("Tổng: %s", getCurrencyFormat(totalAmount)));
+            }
+        }
     }
 }

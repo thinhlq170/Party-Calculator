@@ -1,22 +1,26 @@
 package com.example.partycalculator.adapters;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
+
 import com.example.partycalculator.R;
-import com.example.partycalculator.dtos.PartyDTO;
+import com.example.partycalculator.models.Member;
 import com.example.partycalculator.models.Party;
+import com.example.partycalculator.repositories.MemberRepo;
 
 import java.util.ArrayList;
 
 public class PartyListViewAdapter extends BaseAdapter {
 
-    final ArrayList<PartyDTO> lstParty;
+    final ArrayList<Party> lstParty;
 
-    public PartyListViewAdapter(ArrayList<PartyDTO> lstParty) {
+    public PartyListViewAdapter(ArrayList<Party> lstParty) {
         this.lstParty = lstParty;
     }
 
@@ -35,6 +39,7 @@ public class PartyListViewAdapter extends BaseAdapter {
         return lstParty.get(position).getId();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("DefaultLocale")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -48,11 +53,12 @@ public class PartyListViewAdapter extends BaseAdapter {
         }
 
         //bind du lieu vao view
-        PartyDTO party = (PartyDTO) getItem(position);
-        viewParty.setId(party.getId()); // set id row = partyId
-        ((TextView) viewParty.findViewById(R.id.partyId)).setText(String.format("ID: %d", party.getId()));
-        ((TextView) viewParty.findViewById(R.id.numberMem)).setText(String.format("Number of members: %d", party.getListMembers().size()));
-        ((TextView) viewParty.findViewById(R.id.nameparty)).setText(String.format("Party: %s", party.getName()));
+        MemberRepo memberRepo = new MemberRepo();
+        Party party = (Party) getItem(position);
+        viewParty.setId(Math.toIntExact(party.getId())); // set id row = partyId
+        ArrayList<Member> lstMem = memberRepo.getListMemberByPartyId(party.getId());
+        ((TextView) viewParty.findViewById(R.id.numberMem)).setText(String.format("Số người: %d", lstMem.size()));
+        ((TextView) viewParty.findViewById(R.id.nameparty)).setText(String.format("Tiệc: %s", party.getName()));
         if(party.getUpdateDate() != null && !party.getUpdateDate().isEmpty()) {
             ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Last modified: %s\nCreated: %s", party.getUpdateDate(), party.getDate()));
         } else {

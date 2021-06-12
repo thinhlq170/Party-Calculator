@@ -1,29 +1,36 @@
 package com.example.partycalculator;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ListView;
 
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.partycalculator.adapters.PartyListViewAdapter;
-import com.example.partycalculator.dtos.PartyDTO;
+import com.example.partycalculator.models.Grocery;
 import com.example.partycalculator.models.Party;
+import com.example.partycalculator.repositories.MemberRepo;
 import com.example.partycalculator.repositories.PartyRepo;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class MainActivity extends Activity {
 
-    ArrayList<Party> lstParty;
     PartyListViewAdapter partyListViewAdapter;
     ListView lstViewParty;
     FloatingActionButton addButton;
     Toolbar toolbar;
-    ArrayList<PartyDTO> lstPartyDto;
+    ArrayList<Party> lstPartyDto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,47 +42,55 @@ public class MainActivity extends Activity {
         toolbar = findViewById(R.id.toolbarMain);
         toolbar.setTitle(R.string.list_party);
         lstPartyDto = partyRepo.getListAllParty();
-//        if(getIntent().getExtras() != null) {
-//            lstParty = (ArrayList<Party>) getIntent().getSerializableExtra("lstParty");
-//            if(lstParty == null) {
-//                lstParty = new ArrayList<>();
-//            }
-//        } else {
-//            lstParty = new ArrayList<>();
-//        }
         Collections.sort(lstPartyDto);
         showListParty(lstPartyDto);
 
         addButton = findViewById(R.id.addparty);
         addButton.setOnClickListener(view -> {
-//            int position = lstParty.size() + 1;
-//            lstParty.add(new Party(position, "Party" + position, duration));
-//            showListParty(lstParty);
             Intent intent = new Intent(MainActivity.this, AddActivity.class);
-            PartyDTO dto = new PartyDTO();
-            int partyId = partyRepo.insert(dto);
+            Party party = new Party();
+            party.setDate(getCurrentTime());
+            long partyId = partyRepo.insert(party);
             intent.putExtra("partyId", partyId);
             startActivity(intent);
         });
 
-
-
         lstViewParty.setOnItemClickListener((parent, view, position, id) -> {
             Intent intent = new Intent(MainActivity.this, AddActivity.class);
-//            if(lstParty.get(position) != null) {
-//                intent.putExtra("partyObj", lstParty.get(position));
-//            }
-//            intent.putExtra("lstParty", (Serializable) lstParty);
-            intent.putExtra("partyId", (int)id);
+            intent.putExtra("partyId", id);
             startActivity(intent);
+        });
+        lstViewParty.setOnItemLongClickListener((parent, view, position, id) -> {
+            final int pos = position;
+            new AlertDialog.Builder(MainActivity.this)
+                    .setIcon(R.drawable.ic_recycle_bin)
+                    .setTitle(getResources().getString(R.string.delete_party_item_title))
+                    .setMessage(getResources().getString(R.string.delete_party_message))
+                    .setPositiveButton(getResources().getString(R.string.accept_text_dialog),
+                            (dialog, which) -> {
+                                lstPartyDto.remove(pos);
+                                partyRepo.deleteGroceriesByPartyId(id);
+                                partyRepo.deleteMembersByPartyId(id);
+                                partyRepo.deleteARow(id);
+                                partyListViewAdapter.notifyDataSetChanged();
+                    })
+                    .setNegativeButton(getResources().getString(R.string.deny_text_dialog), null)
+                    .show();
+            return true;
         });
     }
 
-    private void showListParty(ArrayList<PartyDTO> lstParty) {
+    private void showListParty(ArrayList<Party> lstParty) {
         partyListViewAdapter = new PartyListViewAdapter(lstParty);
         lstViewParty = findViewById(R.id.listparty);
         lstViewParty.setAdapter(partyListViewAdapter);
     }
 
+    private String getCurrentTime() {
+        @SuppressLint("SimpleDateFormat")
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
 
 }
