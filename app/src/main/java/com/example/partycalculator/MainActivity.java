@@ -3,18 +3,14 @@ package com.example.partycalculator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ListView;
 
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.partycalculator.adapters.PartyListViewAdapter;
-import com.example.partycalculator.models.Grocery;
 import com.example.partycalculator.models.Party;
-import com.example.partycalculator.repositories.MemberRepo;
 import com.example.partycalculator.repositories.PartyRepo;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

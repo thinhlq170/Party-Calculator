@@ -121,31 +121,25 @@ public class AddActivity extends Activity implements View.OnClickListener{
             paidAmountStr = changeAmountText.getText().toString();
         }
 
-        changeAmountText.setOnClickListener(v -> {
-            showWhenTextOversize(memberView, changeAmountStr);
-        });
-        paidAmountText.setOnClickListener(v -> {
-            showWhenTextOversize(memberView, paidAmountStr);
-        });
+        changeAmountText.setOnClickListener(v -> showWhenTextOversize(memberView, changeAmountStr));
+        paidAmountText.setOnClickListener(v -> showWhenTextOversize(memberView, paidAmountStr));
 
         ImageView imageClose = memberView.findViewById(R.id.image_remove);
         Member finalMember = member;
-        imageClose.setOnClickListener(v -> {
-            new AlertDialog.Builder(AddActivity.this)
-                    .setIcon(R.drawable.ic_recycle_bin)
-                    .setTitle(getResources().getString(R.string.delete_member_dialog_title))
-                    .setMessage(getResources().getString(R.string.delete_member_dialog_message))
-                    .setPositiveButton(getResources().getString(R.string.accept_text_dialog),
-                            (dialog, which) -> {
-                                if(finalMember.getId() != null && finalMember.getId() > 0) {
-                                    memberRepo.deleteGroceriesByMemberId(finalMember.getId());
-                                    memberRepo.deleteARow(finalMember.getId());
-                                }
-                                removeView(memberView);
-                    })
-                    .setNegativeButton(getResources().getString(R.string.deny_text_dialog), null)
-                    .show();
-        });
+        imageClose.setOnClickListener(v -> new AlertDialog.Builder(AddActivity.this)
+                .setIcon(R.drawable.ic_recycle_bin)
+                .setTitle(getResources().getString(R.string.delete_member_dialog_title))
+                .setMessage(getResources().getString(R.string.delete_member_dialog_message))
+                .setPositiveButton(getResources().getString(R.string.accept_text_dialog),
+                        (dialog, which) -> {
+                            if(finalMember.getId() != null && finalMember.getId() > 0) {
+                                memberRepo.deleteGroceriesByMemberId(finalMember.getId());
+                                memberRepo.deleteARow(finalMember.getId());
+                            }
+                            removeView(memberView);
+                })
+                .setNegativeButton(getResources().getString(R.string.deny_text_dialog), null)
+                .show());
         imagePurchase.setOnClickListener(v -> {
             String name = editNameText.getText().toString();
             if(isNullOrEmpty(name)) {
@@ -186,6 +180,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 addMemberView(null);
                 break;
             case R.id.button_submit_list:
+                calculateAmount(Boolean.TRUE);
                 handleBackToMainActivity();
                 break;
             case R.id.button_calculating:
@@ -216,36 +211,21 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 result = false;
                 editNameText.setError(getString(R.string.name_is_required));
             }
-
             if(!isNullOrEmpty(paidAmountTxt)) {
                 BigDecimal paidAmount = new BigDecimal(paidAmountTxt);
                 member.setPaidAmount(paidAmount);
             }
-            member.setPartyId(partyId);
-
             if(result) {
+                member.setPartyId(partyId);
                 if(memView.getId() > 0) {
                     memberRepo.update(member);
                 } else {
                     long memId = memberRepo.insert(member);
                     memView.setId(Math.toIntExact(memId));
                 }
+                lstMember.add(member);
             }
-            lstMember.add(member);
         }
-
-        String partyName = partyNameTv.getText().toString();
-
-        if(isNullOrEmpty(partyName)) {
-            result = false;
-            Toast.makeText(this, "Enter party name!", Toast.LENGTH_SHORT).show();
-        } else if(lstMember.size() == 0) {
-            result = false;
-            Toast.makeText(this, "Please add member or details correctly!", Toast.LENGTH_SHORT).show();
-        }  else if (!result) {
-            Toast.makeText(this, "Enter all details correctly!", Toast.LENGTH_SHORT).show();
-        }
-
         return result;
     }
 
@@ -269,9 +249,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
     @SuppressLint("ResourceType")
     private void calculateAmount(Boolean isSubmit) {
-        if(layoutList.getChildCount() <= 0) {
-            Toast.makeText(this, "Please add member or details correctly!", Toast.LENGTH_SHORT).show();
-        } else {
+        if(layoutList.getChildCount() > 0) {
             BigDecimal totalAmount = BigDecimal.ZERO;
             int memberNumber = layoutList.getChildCount();
 
@@ -307,12 +285,8 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
                 String changeAmountStr = changeAmount.toString();
                 changeAmountText.setText(changeAmountStr);
-                changeAmountText.setOnClickListener(v -> {
-                    showWhenTextOversize(memView, changeAmountStr);
-                });
-                paidAmountText.setOnClickListener(v -> {
-                    showWhenTextOversize(memView, paidAmountStr);
-                });
+                changeAmountText.setOnClickListener(v -> showWhenTextOversize(memView, changeAmountStr));
+                paidAmountText.setOnClickListener(v -> showWhenTextOversize(memView, paidAmountStr));
 
                 if(memView.getId() > 0) {
                     MemberRepo memberRepo = new MemberRepo();
@@ -330,8 +304,11 @@ public class AddActivity extends Activity implements View.OnClickListener{
     }
 
     private String getCurrencyFormat(BigDecimal n) {
-        DecimalFormat df = new DecimalFormat("###,###,###,###,###.0");
-        return df.format(n);
+        if(n != null) {
+            DecimalFormat df = new DecimalFormat("###,###,###,###,###.0");
+            return df.format(n);
+        }
+        return "";
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -399,8 +376,9 @@ public class AddActivity extends Activity implements View.OnClickListener{
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        calculateAmount(Boolean.TRUE);
         handleBackToMainActivity();
+        //super.onBackPressed();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -408,8 +386,10 @@ public class AddActivity extends Activity implements View.OnClickListener{
         if(checkIfValidAndRead()) {
             Intent intent = new Intent(AddActivity.this, MainActivity.class);
             String partyName = partyNameTv.getText().toString();
+            if(isNullOrEmpty(partyName)) {
+                partyName = "";
+            }
             party.setName(partyName);
-            calculateAmount(Boolean.TRUE);
             party.setUpdateDate(getCurrentTime());
             partyRepo.update(party);
             startActivity(intent);

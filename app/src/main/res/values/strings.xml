@@ -27,4 +27,5 @@
     <string name="deny_text_dialog">Không</string>
     <string name="delete_member_dialog_title">Xóa người tham dự</string>
     <string name="delete_member_dialog_message">Bạn có muốn xóa người này?</string>
+    <string name="party_title_required">Vui lòng nhập tên tiệc!</string>
 </resources>
