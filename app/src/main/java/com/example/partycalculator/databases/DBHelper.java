@@ -12,7 +12,7 @@ import com.example.partycalculator.repositories.PartyRepo;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "party_database";
+    private static final String DATABASE_NAME = "party_database.db";
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

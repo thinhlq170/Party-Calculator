@@ -7,15 +7,12 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toolbar;
@@ -106,11 +103,8 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
                 addItemView(null);
                 break;
             case R.id.button_submit_list:
-                if(checkIfValidAndRead()) {
-                    Intent intent = new Intent(AddGroceryActivity.this, AddActivity.class);
-                    intent.putExtra("partyId", partyId);
-                    startActivity(intent);
-                }
+                handleBackToAddActivity();
+                break;
             case R.id.button_total_amount_item:
                 if(layoutListItem.getChildCount() > 0) {
                     BigDecimal res = calculateTotalAmount();
@@ -118,6 +112,7 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
                         totalText.setText(String.format("Tổng: %s", getCurrencyFormat(res)));
                     }
                 }
+                break;
         }
     }
 
@@ -242,6 +237,20 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
                 TextView totalText = findViewById(R.id.total_amount_item);
                 totalText.setText(String.format("Tổng: %s", getCurrencyFormat(totalAmount)));
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        handleBackToAddActivity();
+    }
+
+    private void handleBackToAddActivity() {
+        if(checkIfValidAndRead()) {
+            Intent intent = new Intent(AddGroceryActivity.this, AddActivity.class);
+            intent.putExtra("partyId", partyId);
+            startActivity(intent);
         }
     }
 }

@@ -186,15 +186,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 addMemberView(null);
                 break;
             case R.id.button_submit_list:
-                if(checkIfValidAndRead()) {
-                    Intent intent = new Intent(AddActivity.this, MainActivity.class);
-                    String partyName = partyNameTv.getText().toString();
-                    party.setName(partyName);
-                    calculateAmount(Boolean.TRUE);
-                    party.setUpdateDate(getCurrentTime());
-                    partyRepo.update(party);
-                    startActivity(intent);
-                }
+                handleBackToMainActivity();
                 break;
             case R.id.button_calculating:
                 calculateAmount(Boolean.FALSE);
@@ -325,7 +317,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 if(memView.getId() > 0) {
                     MemberRepo memberRepo = new MemberRepo();
                     Member memberDTO = memberRepo.getMemberById((long) memView.getId());
-                    memberDTO.setChangeAmount(averageAmount);
+                    memberDTO.setChangeAmount(changeAmount);
                     memberRepo.update(memberDTO);
                 }
             }
@@ -401,6 +393,26 @@ public class AddActivity extends Activity implements View.OnClickListener{
     private void showWhenTextOversize(View view, String text) {
         if(text.length() > CHANGE_AMOUNT_MAX_LENGTH_APPEARANCE) {
             onButtonShowPopupWindowClick(view, text);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        handleBackToMainActivity();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void handleBackToMainActivity() {
+        if(checkIfValidAndRead()) {
+            Intent intent = new Intent(AddActivity.this, MainActivity.class);
+            String partyName = partyNameTv.getText().toString();
+            party.setName(partyName);
+            calculateAmount(Boolean.TRUE);
+            party.setUpdateDate(getCurrentTime());
+            partyRepo.update(party);
+            startActivity(intent);
         }
     }
 }
