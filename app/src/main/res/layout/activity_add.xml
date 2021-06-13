@@ -8,10 +8,10 @@
     android:orientation="vertical">
 
 
-    <androidx.appcompat.widget.Toolbar
+    <Toolbar
         android:id="@+id/toolbar2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:background="@android:color/holo_blue_bright"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
@@ -24,7 +24,7 @@
             android:hint="@string/party_name_hint"
             android:autofillHints="@string/party_name_hint_fill"
             android:inputType="text"/>
-    </androidx.appcompat.widget.Toolbar>
+    </Toolbar>
 
     <Button
         android:id="@+id/button_add"
@@ -91,7 +91,7 @@
     <ScrollView
         android:id="@+id/scroll_list_mem"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="410dp"
         android:orientation="vertical">
         <LinearLayout
             android:id="@+id/layout_list"

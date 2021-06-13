@@ -170,24 +170,26 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
                 result = false;
                 paidText.setError(getResources().getString(R.string.item_paid_is_required));
             }
-            if(itemView.getId() > 0) {
-                Grocery dto = groceryRepo.getGroceryById((long) itemView.getId());
-                dto.setItemName(nameStr);
-                dto.setPrice(new BigDecimal(paidStr));
-                groceryRepo.update(dto);
-            } else {
-                Grocery dto = new Grocery();
-                dto.setItemName(nameStr);
-                dto.setPrice(new BigDecimal(paidStr));
-                dto.setMemberId(member.getId());
-                dto.setPartyId(partyId);
-                long groceryId = groceryRepo.insert(dto);
-                itemView.setId(Math.toIntExact(groceryId));
+            if(result) {
+                if(itemView.getId() > 0 ) {
+                    Grocery dto = groceryRepo.getGroceryById((long) itemView.getId());
+                    dto.setItemName(nameStr);
+                    dto.setPrice(new BigDecimal(paidStr));
+                    groceryRepo.update(dto);
+                } else {
+                    Grocery dto = new Grocery();
+                    dto.setItemName(nameStr);
+                    dto.setPrice(new BigDecimal(paidStr));
+                    dto.setMemberId(member.getId());
+                    dto.setPartyId(partyId);
+                    long groceryId = groceryRepo.insert(dto);
+                    itemView.setId(Math.toIntExact(groceryId));
+                }
+                total = total.add(new BigDecimal(paidStr));
             }
-            total = total.add(new BigDecimal(paidStr));
+            member.setPaidAmount(total);
+            memberRepo.update(member);
         }
-        member.setPaidAmount(total);
-        memberRepo.update(member);
         return result;
     }
 
