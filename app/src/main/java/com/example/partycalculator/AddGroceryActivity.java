@@ -122,10 +122,8 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
     }
 
     private void showListItem(ArrayList<Grocery> lstItem) {
-        if (listItem != null && lstItem.size() > 0) {
-            for(int i = 0; i < lstItem.size(); i++) {
-                addItemView(lstItem.get(i));
-            }
+        for(Grocery item : lstItem) {
+            addItemView(item);
         }
     }
 

@@ -222,8 +222,8 @@ public class AddMemberActivity extends Activity implements View.OnClickListener{
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void addViewPartyDetail(ArrayList<Member> lstMem) {
-        for(int i = 0; i < lstMem.size(); i++) {
-            addMemberView(lstMem.get(i));
+        for(Member member : lstMem) {
+            addMemberView(member);
         }
     }
 
