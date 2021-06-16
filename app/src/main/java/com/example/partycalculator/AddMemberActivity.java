@@ -19,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -36,7 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class AddActivity extends Activity implements View.OnClickListener{
+public class AddMemberActivity extends Activity implements View.OnClickListener{
 
     ArrayList<Member> lstMember = new ArrayList<>();
     LinearLayout layoutList;
@@ -55,7 +54,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add);
+        setContentView(R.layout.activity_add_member);
 
         layoutList = findViewById(R.id.layout_list);
         buttonAdd = findViewById(R.id.button_add);
@@ -126,7 +125,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
 
         ImageView imageClose = memberView.findViewById(R.id.image_remove);
         Member finalMember = member;
-        imageClose.setOnClickListener(v -> new AlertDialog.Builder(AddActivity.this)
+        imageClose.setOnClickListener(v -> new AlertDialog.Builder(AddMemberActivity.this)
                 .setIcon(R.drawable.ic_recycle_bin)
                 .setTitle(getResources().getString(R.string.delete_member_dialog_title))
                 .setMessage(getResources().getString(R.string.delete_member_dialog_message))
@@ -142,9 +141,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 .show());
         imagePurchase.setOnClickListener(v -> {
             String name = editNameText.getText().toString();
-            if(isNullOrEmpty(name)) {
-                editNameText.setError(getString(R.string.name_is_required));
-            }
+            name = isNullOrEmpty(name) ? "" : name;
             MemberRepo memberRepo = new MemberRepo();
             long memberId;
             if(memberView.getId() > 0) {
@@ -158,7 +155,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
             String title = partyNameTv.getText().toString();
             party.setName(title);
             partyRepo.update(party);
-            Intent intent = new Intent(AddActivity.this, AddGroceryActivity.class);
+            Intent intent = new Intent(AddMemberActivity.this, AddGroceryActivity.class);
             intent.putExtra("memberId", memberId);
             intent.putExtra("partyId", partyId);
             startActivity(intent);
@@ -180,21 +177,19 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 addMemberView(null);
                 break;
             case R.id.button_submit_list:
-                calculateAmount(Boolean.TRUE);
+                calculateAmount();
                 handleBackToMainActivity();
                 break;
             case R.id.button_calculating:
-                calculateAmount(Boolean.FALSE);
+                calculateAmount();
                 break;
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @SuppressLint("ResourceType")
-    private boolean checkIfValidAndRead() {
+    private void checkIfValidAndRead() {
         lstMember.clear();
-        boolean result = true;
-
         for(int i = 0; i < layoutList.getChildCount(); i++) {
             View memView = layoutList.getChildAt(i);
 
@@ -204,29 +199,21 @@ public class AddActivity extends Activity implements View.OnClickListener{
             Member member = new Member();
             String name = editNameText.getText().toString();
             String paidAmountTxt = editPaidAmountText.getText().toString();
-
-            if(!isNullOrEmpty(name)) {
-                member.setName(name);
-            } else {
-                result = false;
-                editNameText.setError(getString(R.string.name_is_required));
-            }
-            if(!isNullOrEmpty(paidAmountTxt)) {
+            name = isNullOrEmpty(name) ? "" : name;
+            member.setName(name);
+            if (!isNullOrEmpty(paidAmountTxt)) {
                 BigDecimal paidAmount = new BigDecimal(paidAmountTxt);
                 member.setPaidAmount(paidAmount);
             }
-            if(result) {
-                member.setPartyId(partyId);
-                if(memView.getId() > 0) {
-                    memberRepo.update(member);
-                } else {
-                    long memId = memberRepo.insert(member);
-                    memView.setId(Math.toIntExact(memId));
-                }
-                lstMember.add(member);
+            member.setPartyId(partyId);
+            if (memView.getId() > 0) {
+                memberRepo.update(member);
+            } else {
+                long memId = memberRepo.insert(member);
+                memView.setId(Math.toIntExact(memId));
             }
+            lstMember.add(member);
         }
-        return result;
     }
 
     private Boolean isNullOrEmpty(String text) {
@@ -248,7 +235,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
     }
 
     @SuppressLint("ResourceType")
-    private void calculateAmount(Boolean isSubmit) {
+    private void calculateAmount() {
         if(layoutList.getChildCount() > 0) {
             BigDecimal totalAmount = BigDecimal.ZERO;
             int memberNumber = layoutList.getChildCount();
@@ -296,10 +283,8 @@ public class AddActivity extends Activity implements View.OnClickListener{
                 }
             }
 
-            if(isSubmit.equals(Boolean.FALSE)) {
-                ((TextView)findViewById(R.id.total_amount)).setText(String.format("Total Amount: %s", getCurrencyFormat(totalAmount)));
-                ((TextView)findViewById(R.id.average_amount)).setText(String.format("Average Amount: %s", getCurrencyFormat(averageAmount)));
-            }
+            ((TextView)findViewById(R.id.total_amount)).setText(String.format("Total Amount: %s", getCurrencyFormat(totalAmount)));
+            ((TextView)findViewById(R.id.average_amount)).setText(String.format("Average Amount: %s", getCurrencyFormat(averageAmount)));
         }
     }
 
@@ -363,7 +348,7 @@ public class AddActivity extends Activity implements View.OnClickListener{
             lstMember = lstMem;
             //addViewPartyDetail(lstMember);
             if(isCalculated.equals(Boolean.TRUE))
-                calculateAmount(Boolean.FALSE);
+                calculateAmount();
         }
     }
 
@@ -376,23 +361,22 @@ public class AddActivity extends Activity implements View.OnClickListener{
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBackPressed() {
-        calculateAmount(Boolean.TRUE);
         handleBackToMainActivity();
+        calculateAmount();
         //super.onBackPressed();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void handleBackToMainActivity() {
-        if(checkIfValidAndRead()) {
-            Intent intent = new Intent(AddActivity.this, MainActivity.class);
-            String partyName = partyNameTv.getText().toString();
-            if(isNullOrEmpty(partyName)) {
-                partyName = "";
-            }
-            party.setName(partyName);
-            party.setUpdateDate(getCurrentTime());
-            partyRepo.update(party);
-            startActivity(intent);
+        checkIfValidAndRead();
+        Intent intent = new Intent(AddMemberActivity.this, MainActivity.class);
+        String partyName = partyNameTv.getText().toString();
+        if(isNullOrEmpty(partyName)) {
+            partyName = "";
         }
+        party.setName(partyName);
+        party.setUpdateDate(getCurrentTime());
+        partyRepo.update(party);
+        startActivity(intent);
     }
 }

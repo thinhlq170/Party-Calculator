@@ -56,15 +56,15 @@ public class MemberRepo {
         db.close();
     }
 
-    public int update(Member dto) {
-        int updateSuccess = -1;
+    public void update(Member dto) {
         if(dto != null) {
             ContentValues values = initMemberData(dto);
             SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
-            updateSuccess = db.update(Member.TABLE, values, Member.KEY_ID + "= ?", new String[]{String.valueOf(dto.getId())});
+            db.update(Member.TABLE, values, Member.KEY_ID + "= ?", new String[]{String.valueOf(dto.getId())});
             DatabaseManager.getInstance().closeDatabase();
+        } else {
+            Log.v("Cannot update", ",cause id is null");
         }
-        return updateSuccess;
     }
 
     private ContentValues initMemberData(Member mem) {

@@ -22,10 +22,6 @@ public class Party implements Serializable, Comparable<Party> {
     private String date;
     private String updateDate;
 
-    public Party(String name) {
-        this.name = name;
-    }
-
     public Party() {
     }
 

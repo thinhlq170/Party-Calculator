@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
 
         addButton = findViewById(R.id.addparty);
         addButton.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            Intent intent = new Intent(MainActivity.this, AddMemberActivity.class);
             Party party = new Party();
             party.setDate(getCurrentTime());
             long partyId = partyRepo.insert(party);
@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
         });
 
         lstViewParty.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(MainActivity.this, AddActivity.class);
+            Intent intent = new Intent(MainActivity.this, AddMemberActivity.class);
             intent.putExtra("partyId", id);
             startActivity(intent);
         });

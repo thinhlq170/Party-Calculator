@@ -31,10 +31,6 @@ public class Member implements Serializable {
     public Member() {
     }
 
-    public Member(String name) {
-        this.name = name;
-    }
-
     public Long getId() {
         return id;
     }
@@ -88,7 +84,6 @@ public class Member implements Serializable {
     }
 
     public void initFromCursor(Cursor cursor) {
-        GroceryRepo groceryRepo = new GroceryRepo();
         this.id = cursor.getLong(cursor.getColumnIndex(Member.KEY_ID));
         this.name = cursor.getString(cursor.getColumnIndex(Member.NAME));
         this.paidAmount = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndex(Member.PAID_AMOUNT)));

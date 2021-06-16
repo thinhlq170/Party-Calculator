@@ -1,20 +1,17 @@
 <resources>
     <string name="app_name">Party Calculator</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="list_party">Danh sách tiệc</string>
     <string name="index">STT</string>
     <string name="name">Tên</string>
     <string name="phone">Phone</string>
     <string name="paid_amount">Phí trả</string>
     <string name="change_amount">Phí dư</string>
-    <string name="join_date">Join Date</string>
     <string name="party_name_hint">Nhập tên tiệc</string>
     <string name="party_name_hint_fill">Party X</string>
     <string name="add_button">Thêm</string>
     <string name="save_content">Lưu</string>
     <string name="save">Lưu</string>
     <string name="name_is_required">Vui lòng nhập tên</string>
-    <string name="paid_amount_is_required">Please enter paid amount!</string>
     <string name="calculating_button">Tính tiền</string>
     <string name="item_price">Chi phí</string>
     <string name="item">Việc chi tiền</string>

@@ -17,10 +17,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class PartyRepo {
-    private Party party;
 
     public PartyRepo() {
-        this.party = new Party();
     }
 
     public static String createTable() {
@@ -102,15 +100,15 @@ public class PartyRepo {
         return dateFormat.format(date);
     }
 
-    public int update(Party dto) {
-        int updateSuccess = -1;
+    public void update(Party dto) {
         if(dto != null) {
             ContentValues values = initPartyData(dto);
             SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
-            updateSuccess = db.update(Party.TABLE, values, Party.KEY_ID + "= ?", new String[]{String.valueOf(dto.getId())});
+            db.update(Party.TABLE, values, Party.KEY_ID + "= ?", new String[]{String.valueOf(dto.getId())});
             DatabaseManager.getInstance().closeDatabase();
+        } else {
+            Log.v("Cannot update", ",cause id is null");
         }
-        return updateSuccess;
     }
 
     public void deleteGroceriesByPartyId(Long partyId) {

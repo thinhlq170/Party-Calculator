@@ -55,15 +55,15 @@ public class GroceryRepo {
         return lstData;
     }
 
-    public int update(Grocery dto) {
-        int updateSuccess = -1;
+    public void update(Grocery dto) {
         if(dto != null) {
             ContentValues values = initGroceryData(dto);
             SQLiteDatabase db = DatabaseManager.getInstance().openDatabase();
-            updateSuccess = db.update(Grocery.TABLE, values, Grocery.KEY_ID + "= ?", new String[]{String.valueOf(dto.getId())});
+            db.update(Grocery.TABLE, values, Grocery.KEY_ID + "= ?", new String[]{String.valueOf(dto.getId())});
             DatabaseManager.getInstance().closeDatabase();
+        } else {
+            Log.v("Cannot update", ",cause id is null");
         }
-        return updateSuccess;
     }
 
     private ContentValues initGroceryData(Grocery grocery) {

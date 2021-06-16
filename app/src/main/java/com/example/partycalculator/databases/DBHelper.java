@@ -1,6 +1,5 @@
 package com.example.partycalculator.databases;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -13,10 +12,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "party_database.db";
-
-    public DBHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
 
     public DBHelper( ) {
         super(App.getContext(), DATABASE_NAME, null, DATABASE_VERSION);

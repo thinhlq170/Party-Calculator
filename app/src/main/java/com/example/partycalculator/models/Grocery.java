@@ -24,11 +24,6 @@ public class Grocery implements Serializable {
 
     }
 
-    public Grocery(String itemName, BigDecimal price) {
-        this.itemName = itemName;
-        this.price = price;
-    }
-
     public String getItemName() {
         return itemName;
     }

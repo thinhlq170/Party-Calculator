@@ -91,7 +91,12 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
             params.height = height;
             scrollListItemView.setLayoutParams(params);
         }
-        titleTb.setTitle(String.format("Danh sách đã chi của %s", member.getName()));
+        if(!isNullOrEmpty(member.getName())) {
+            titleTb.setTitle(String.format("Danh sách đã chi của %s", member.getName()));
+        } else {
+            titleTb.setTitle("Danh sách đã chi");
+        }
+
     }
 
 
@@ -250,7 +255,7 @@ public class AddGroceryActivity extends Activity implements View.OnClickListener
 
     private void handleBackToAddActivity() {
         if(checkIfValidAndRead()) {
-            Intent intent = new Intent(AddGroceryActivity.this, AddActivity.class);
+            Intent intent = new Intent(AddGroceryActivity.this, AddMemberActivity.class);
             intent.putExtra("partyId", partyId);
             startActivity(intent);
         }
