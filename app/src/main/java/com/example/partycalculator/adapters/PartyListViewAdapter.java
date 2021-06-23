@@ -59,11 +59,12 @@ public class PartyListViewAdapter extends BaseAdapter {
         ArrayList<Member> lstMem = memberRepo.getListMemberByPartyId(party.getId());
         ((TextView) viewParty.findViewById(R.id.numberMem)).setText(String.format("Số người: %d", lstMem.size()));
         ((TextView) viewParty.findViewById(R.id.nameparty)).setText(String.format("Tiệc: %s", party.getName()));
-        if(party.getUpdateDate() != null && !party.getUpdateDate().isEmpty()) {
-            ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Last modified: %s\nCreated: %s", party.getUpdateDate(), party.getDate()));
-        } else {
-            ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Created: %s", party.getDate()));
-        }
+//        if(party.getUpdateDate() != null && !party.getUpdateDate().isEmpty()) {
+//            ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Last modified: %s\nCreated: %s", party.getUpdateDate(), party.getDate()));
+//        } else {
+//            ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Created: %s", party.getDate()));
+//        }
+        ((TextView) viewParty.findViewById(R.id.dateparty)).setText(String.format("Created: %s", party.getDate()));
         return viewParty;
     }
 }
