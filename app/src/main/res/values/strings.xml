@@ -25,4 +25,6 @@
     <string name="delete_member_dialog_title">Xóa người tham dự</string>
     <string name="delete_member_dialog_message">Bạn có muốn xóa người này?</string>
     <string name="party_title_required">Vui lòng nhập tên tiệc!</string>
+    <string name="add_member_button">Thêm người dự</string>
+    <string name="add_grocery_button">Thêm mục chi tiền</string>
 </resources>
